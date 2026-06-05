@@ -396,7 +396,9 @@ export function SidebarPanel({
                     onClick={() => {
                       setSelectedBeachId(beach.id);
                       setSelectedAccessId(null);
-                      setMapCenter([beach.latitude, beach.longitude]);
+                      if (typeof beach.latitude === 'number' && !isNaN(beach.latitude) && typeof beach.longitude === 'number' && !isNaN(beach.longitude)) {
+                        setMapCenter([beach.latitude, beach.longitude]);
+                      }
                       setMapZoom(15);
                       setBeachDetailOpen(true);
                       setVisibleImagesLimit(4);

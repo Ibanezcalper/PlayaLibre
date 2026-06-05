@@ -151,8 +151,8 @@ export function BeachDetailsModal({
                 <MapContainer
                   key={`detail-map-${selectedBeach.id}`}
                   center={[
-                    isNaN(selectedBeach.latitude) ? 15.8617 : selectedBeach.latitude,
-                    isNaN(selectedBeach.longitude) ? -97.0786 : selectedBeach.longitude
+                    (typeof selectedBeach.latitude !== 'number' || isNaN(selectedBeach.latitude)) ? 15.8617 : selectedBeach.latitude,
+                    (typeof selectedBeach.longitude !== 'number' || isNaN(selectedBeach.longitude)) ? -97.0786 : selectedBeach.longitude
                   ]}
                   zoom={15}
                   zoomControl={false}
@@ -165,7 +165,7 @@ export function BeachDetailsModal({
                   <ZoomControl position="topright" />
                   
                   {selectedBeach.boundaryPolygon && selectedBeach.boundaryPolygon.length > 2 && 
-                   !selectedBeach.boundaryPolygon.some(([lat, lng]) => isNaN(lat) || isNaN(lng)) && (
+                   !selectedBeach.boundaryPolygon.some(([lat, lng]) => typeof lat !== 'number' || isNaN(lat) || typeof lng !== 'number' || isNaN(lng)) && (
                     <Polygon
                       positions={selectedBeach.boundaryPolygon}
                       pathOptions={{
@@ -178,7 +178,7 @@ export function BeachDetailsModal({
                   )}
 
                   {selectedBeach.accesses.map((acc) => {
-                    if (isNaN(acc.latitude) || isNaN(acc.longitude)) return null;
+                    if (typeof acc.latitude !== 'number' || isNaN(acc.latitude) || typeof acc.longitude !== 'number' || isNaN(acc.longitude)) return null;
                     const isBlocked = acc.blockerType !== 'None';
                     return (
                       <Marker
@@ -215,7 +215,9 @@ export function BeachDetailsModal({
                         key={acc.id} 
                         onClick={() => {
                           setSelectedAccessId(acc.id);
-                          setMapCenter([acc.latitude, acc.longitude]);
+                          if (typeof acc.latitude === 'number' && !isNaN(acc.latitude) && typeof acc.longitude === 'number' && !isNaN(acc.longitude)) {
+                            setMapCenter([acc.latitude, acc.longitude]);
+                          }
                           onClose(); // Close modal when inspecting single access in main page sidebar
                         }}
                         className={`p-3 rounded-2xl border transition-all cursor-pointer select-none text-left ${
