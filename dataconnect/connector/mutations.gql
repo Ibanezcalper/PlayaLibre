@@ -9,7 +9,7 @@ mutation CreateBeach(
   $boundaryPolygon: Any
   $images: Any
   $userId: String
-) @auth(level: PUBLIC) {
+) @auth(expr: "auth != null && auth.uid == vars.userId") {
   beach_insert(data: {
     name: $name
     state: $state
@@ -47,7 +47,7 @@ mutation CreateAccess(
   $blockerDescription: String
   $illegalFeeAmount: Float!
   $userId: String
-) @auth(level: PUBLIC) {
+) @auth(expr: "auth != null && auth.uid == vars.userId") {
   access_insert(data: {
     beachId: $beachId
     name: $name
@@ -88,7 +88,7 @@ mutation CreateReport(
   $hasIllegalFee: Boolean!
   $feeAmount: Float
   $userId: String
-) @auth(level: PUBLIC) {
+) @auth(expr: "auth != null && auth.uid == vars.userId") {
   report_insert(data: {
     accessId: $accessId
     reporterName: $reporterName
@@ -111,7 +111,7 @@ mutation UpdateAccessCuration(
   $illegalFeeAmount: Float!
   $reputation: Int!
   $isPendingCuration: Boolean!
-) @auth(level: PUBLIC) {
+) @auth(expr: "auth.token.email_verified && auth.token.email == 'marpc331@gmail.com'") {
   access_update(
     id: $id,
     data: {
@@ -129,7 +129,7 @@ mutation UpdateAccessCuration(
 mutation UpdateReportScore(
   $id: UUID!
   $score: Int!
-) @auth(level: PUBLIC) {
+) @auth(level: USER) {
   report_update(
     id: $id,
     data: {
@@ -141,7 +141,7 @@ mutation UpdateReportScore(
 # Delete a report
 mutation DeleteReport(
   $id: UUID!
-) @auth(level: PUBLIC) {
+) @auth(level: USER) {
   report_delete(
     id: $id
   )
@@ -154,7 +154,7 @@ mutation UpsertUser(
   $avatarUrl: String
   $bio: String
   $reputation: Int!
-) @auth(level: PUBLIC) {
+) @auth(expr: "auth != null && auth.uid == vars.id") {
   user_upsert(data: {
     id: $id
     username: $username
@@ -168,7 +168,7 @@ mutation UpsertUser(
 mutation UpdateUserReputation(
   $id: String!
   $reputation: Int!
-) @auth(level: PUBLIC) {
+) @auth(level: USER) {
   user_update(
     id: $id
     data: {
@@ -182,7 +182,7 @@ mutation CreateComment(
   $beachId: UUID!
   $userId: String!
   $text: String!
-) @auth(level: PUBLIC) {
+) @auth(expr: "auth != null && auth.uid == vars.userId") {
   comment_insert(data: {
     beachId: $beachId
     userId: $userId
@@ -193,7 +193,7 @@ mutation CreateComment(
 # Delete a comment
 mutation DeleteComment(
   $id: UUID!
-) @auth(level: PUBLIC) {
+) @auth(level: USER) {
   comment_delete(
     id: $id
   )
