@@ -38,7 +38,7 @@ La plataforma está dirigida a:
 ## Características de gobernanza y perfiles
 
 * **Sistema de karma y reputación**: Las contribuciones legítimas otorgan karma al perfil del usuario (+5 puntos por votos positivos). Los curadores autorizados tienen un multiplicador de impacto de voto de x3.
-* **Asignación estricta de curador**: El rol de curador no se puede alternar manualmente. Se valida en base al correo electrónico verificado del usuario en el servidor, estando asignado a marpc331@gmail.com.
+* **Asignación estricta de curador**: El rol de curador no se puede alternar manualmente. Se valida en base al correo electrónico verificado del usuario en el servidor, limitando los privilegios de moderación exclusivamente al curador principal asignado.
 * **Ficha de perfil de colaborador**: Modal interactivo que muestra la biografía del usuario (editable si es el perfil propio), su karma y estadísticas reactivas de aportes cívicos (total de playas registradas, rutas creadas y fotos aportadas).
 * **Verificación de colaboradores**: Posibilidad de hacer clic en los avatares y apodos en comentarios y registros para visualizar la ficha de perfil de cualquier usuario.
 

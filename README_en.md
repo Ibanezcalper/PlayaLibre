@@ -38,7 +38,7 @@ The platform is built for:
 ## Governance and profiles
 
 * **Karma and reputation system**: Legitimate contributions award karma to the user's profile (+5 points for positive votes). Authorized curators have a x3 vote moderation weight.
-* **Strict curator role assignment**: The curator role cannot be manually toggled. It is validated server-side based on the verified email address, currently assigned to marpc331@gmail.com.
+* **Strict curator role assignment**: The curator role cannot be manually toggled. It is validated server-side based on the verified email address, limiting moderation privileges exclusively to the assigned main curator account.
 * **Contributor profile details**: Interactive modal showing user biography (editable if self), karma score, and reactive contribution statistics (total beaches, accesses, and photos registered).
 * **Contributor verification**: Clicking on avatars or usernames in comments, beach cards, or access lists opens the contributor's profile details.
 
