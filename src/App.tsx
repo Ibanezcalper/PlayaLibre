@@ -165,7 +165,7 @@ export default function App() {
 
   // Map configs
   const [mapLayer, setMapLayer] = useState<'satellite' | 'streets'>('satellite');
-  const [mapCenter, setMapCenter] = useState<[number, number]>([15.8617, -97.0786]);
+  const [mapCenter, setMapCenter] = useState<[number, number]>([21.1619, -86.8515]);
   const [mapZoom, setMapZoom] = useState<number>(13);
   const [drawMode, setDrawMode] = useState<'beach' | 'access_pin' | 'trail' | null>(null);
   const [drawingPoints, setDrawingPoints] = useState<[number, number][]>([]);
@@ -2174,7 +2174,7 @@ export default function App() {
                   center={
                     (mapCenter && typeof mapCenter[0] === 'number' && !isNaN(mapCenter[0]) && typeof mapCenter[1] === 'number' && !isNaN(mapCenter[1])) 
                       ? mapCenter 
-                      : [15.8617, -97.0786]
+                      : [21.1619, -86.8515]
                   }
                   zoom={mapZoom}
                   zoomControl={false}
@@ -2184,7 +2184,7 @@ export default function App() {
                     center={
                       (mapCenter && typeof mapCenter[0] === 'number' && !isNaN(mapCenter[0]) && typeof mapCenter[1] === 'number' && !isNaN(mapCenter[1])) 
                         ? mapCenter 
-                        : [15.8617, -97.0786]
+                        : [21.1619, -86.8515]
                     } 
                     zoom={mapZoom} 
                   />

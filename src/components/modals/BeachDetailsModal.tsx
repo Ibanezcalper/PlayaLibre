@@ -151,8 +151,8 @@ export function BeachDetailsModal({
                 <MapContainer
                   key={`detail-map-${selectedBeach.id}`}
                   center={[
-                    (typeof selectedBeach.latitude !== 'number' || isNaN(selectedBeach.latitude)) ? 15.8617 : selectedBeach.latitude,
-                    (typeof selectedBeach.longitude !== 'number' || isNaN(selectedBeach.longitude)) ? -97.0786 : selectedBeach.longitude
+                    (typeof selectedBeach.latitude !== 'number' || isNaN(selectedBeach.latitude)) ? 21.1619 : selectedBeach.latitude,
+                    (typeof selectedBeach.longitude !== 'number' || isNaN(selectedBeach.longitude)) ? -86.8515 : selectedBeach.longitude
                   ]}
                   zoom={15}
                   zoomControl={false}
