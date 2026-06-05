@@ -150,7 +150,10 @@ export function BeachDetailsModal({
               <div className="w-full h-72 rounded-2xl border border-gray-300 overflow-hidden shadow-sm bg-[#151c14] relative z-10">
                 <MapContainer
                   key={`detail-map-${selectedBeach.id}`}
-                  center={[selectedBeach.latitude, selectedBeach.longitude]}
+                  center={[
+                    isNaN(selectedBeach.latitude) ? 15.8617 : selectedBeach.latitude,
+                    isNaN(selectedBeach.longitude) ? -97.0786 : selectedBeach.longitude
+                  ]}
                   zoom={15}
                   zoomControl={false}
                   className="w-full h-full"
@@ -161,7 +164,8 @@ export function BeachDetailsModal({
                   />
                   <ZoomControl position="topright" />
                   
-                  {selectedBeach.boundaryPolygon && selectedBeach.boundaryPolygon.length > 2 && (
+                  {selectedBeach.boundaryPolygon && selectedBeach.boundaryPolygon.length > 2 && 
+                   !selectedBeach.boundaryPolygon.some(([lat, lng]) => isNaN(lat) || isNaN(lng)) && (
                     <Polygon
                       positions={selectedBeach.boundaryPolygon}
                       pathOptions={{
@@ -174,6 +178,7 @@ export function BeachDetailsModal({
                   )}
 
                   {selectedBeach.accesses.map((acc) => {
+                    if (isNaN(acc.latitude) || isNaN(acc.longitude)) return null;
                     const isBlocked = acc.blockerType !== 'None';
                     return (
                       <Marker

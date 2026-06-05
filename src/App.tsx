@@ -2171,12 +2171,23 @@ export default function App() {
               {/* MapContainer */}
               <div className="flex-1 w-full h-full relative z-10">
                 <MapContainer
-                  center={mapCenter}
+                  center={
+                    (mapCenter && !isNaN(mapCenter[0]) && !isNaN(mapCenter[1])) 
+                      ? mapCenter 
+                      : [15.8617, -97.0786]
+                  }
                   zoom={mapZoom}
                   zoomControl={false}
                   className="w-full h-full"
                 >
-                  <ChangeMapView center={mapCenter} zoom={mapZoom} />
+                  <ChangeMapView 
+                    center={
+                      (mapCenter && !isNaN(mapCenter[0]) && !isNaN(mapCenter[1])) 
+                        ? mapCenter 
+                        : [15.8617, -97.0786]
+                    } 
+                    zoom={mapZoom} 
+                  />
                   
                   {mapLayer === 'streets' ? (
                     <TileLayer
@@ -2196,6 +2207,7 @@ export default function App() {
                   {/* Polygons */}
                   {beaches.map((b) => {
                     if (!b.boundaryPolygon || b.boundaryPolygon.length < 3) return null;
+                    if (b.boundaryPolygon.some(([lat, lng]) => isNaN(lat) || isNaN(lng))) return null;
                     const isSelected = b.id === selectedBeachId;
                     const isBlocked = b.accesses.some(a => a.blockerType !== 'None');
 
@@ -2225,6 +2237,7 @@ export default function App() {
                   {/* Access Markers */}
                   {beaches.map((b) =>
                     b.accesses.map((acc) => {
+                      if (isNaN(acc.latitude) || isNaN(acc.longitude)) return null;
                       const isBlocked = acc.blockerType !== 'None';
                       const isSelected = acc.id === selectedAccessId;
 
@@ -2257,7 +2270,8 @@ export default function App() {
                   )}
 
                   {/* Selected access path */}
-                  {selectedAccess && selectedAccess.trailGeometry && selectedAccess.trailGeometry.length > 0 && (
+                  {selectedAccess && selectedAccess.trailGeometry && selectedAccess.trailGeometry.length > 0 && 
+                   !selectedAccess.trailGeometry.some(([lat, lng]) => isNaN(lat) || isNaN(lng)) && (
                     <Polyline
                       positions={selectedAccess.trailGeometry}
                       pathOptions={{
