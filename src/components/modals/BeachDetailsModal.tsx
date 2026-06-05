@@ -156,6 +156,7 @@ export function BeachDetailsModal({
                   ]}
                   zoom={15}
                   zoomControl={false}
+                  {...({ tap: false } as any)}
                   className="w-full h-full"
                 >
                   <TileLayer

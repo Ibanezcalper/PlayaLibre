@@ -104,6 +104,7 @@ L.Icon.Default.mergeOptions({
 
 export default function App() {
   const [mobileSection, setMobileSection] = useState<'list' | 'map'>('list');
+  const [isMobile, setIsMobile] = useState(false);
   const [isHighReputationUser, setIsHighReputationUser] = useState(false);
 
   // Sync state & connection queues
@@ -1096,6 +1097,16 @@ export default function App() {
       deregister();
     };
   }, [beaches]);
+
+  // Monitor mobile screen size for rendering performance and Leaflet safety
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const showToast = (text: string, type: 'success' | 'warn' | 'info') => {
     setToastMessage({ text, type });
@@ -2170,186 +2181,201 @@ export default function App() {
 
               {/* MapContainer */}
               <div className="flex-1 w-full h-full relative z-10">
-                <MapContainer
-                  center={
-                    (mapCenter && typeof mapCenter[0] === 'number' && !isNaN(mapCenter[0]) && typeof mapCenter[1] === 'number' && !isNaN(mapCenter[1])) 
-                      ? mapCenter 
-                      : [21.1619, -86.8515]
-                  }
-                  zoom={mapZoom}
-                  zoomControl={false}
-                  className="w-full h-full"
-                >
-                  <ChangeMapView 
+                {(!isMobile || mobileSection === 'map') ? (
+                  <MapContainer
                     center={
                       (mapCenter && typeof mapCenter[0] === 'number' && !isNaN(mapCenter[0]) && typeof mapCenter[1] === 'number' && !isNaN(mapCenter[1])) 
                         ? mapCenter 
                         : [21.1619, -86.8515]
-                    } 
-                    zoom={mapZoom} 
-                  />
-                  
-                  {mapLayer === 'streets' ? (
-                    <TileLayer
-                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    }
+                    zoom={mapZoom}
+                    zoomControl={false}
+                    {...({ tap: false } as any)}
+                    className="w-full h-full"
+                  >
+                    <ChangeMapView 
+                      center={
+                        (mapCenter && typeof mapCenter[0] === 'number' && !isNaN(mapCenter[0]) && typeof mapCenter[1] === 'number' && !isNaN(mapCenter[1])) 
+                          ? mapCenter 
+                          : [21.1619, -86.8515]
+                      } 
+                      zoom={mapZoom} 
                     />
-                  ) : (
-                    <TileLayer
-                      attribution='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-                      url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-                    />
-                  )}
-
-                  <ZoomControl position="topright" />
-                  <MapEvents onMapClick={handleMapClick} />
-
-                  {/* Polygons */}
-                  {beaches.map((b) => {
-                    if (!b.boundaryPolygon || b.boundaryPolygon.length < 3) return null;
-                    if (b.boundaryPolygon.some(([lat, lng]) => typeof lat !== 'number' || isNaN(lat) || typeof lng !== 'number' || isNaN(lng))) return null;
-                    const isSelected = b.id === selectedBeachId;
-                    const isBlocked = b.accesses.some(a => a.blockerType !== 'None');
-
-                    return (
-                      <Polygon
-                        key={`poly-${b.id}`}
-                        positions={b.boundaryPolygon}
-                        pathOptions={{
-                          color: isSelected ? '#F26522' : isBlocked ? '#ef4444' : '#10b981',
-                          fillColor: isSelected ? '#F26522' : isBlocked ? '#ef4444' : '#10b981',
-                          fillOpacity: isSelected ? 0.35 : 0.15,
-                          weight: isSelected ? 3 : 1.5
-                        }}
-                        eventHandlers={{
-                          click: () => {
-                            setSelectedBeachId(b.id);
-                            setSelectedAccessId(null);
-                            setBeachDetailOpen(true);
-                            setVisibleImagesLimit(4);
-                            loadComments(b.id);
-                          }
-                        }}
+                    
+                    {mapLayer === 'streets' ? (
+                      <TileLayer
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                       />
-                    );
-                  })}
+                    ) : (
+                      <TileLayer
+                        attribution='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+                        url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                      />
+                    )}
 
-                  {/* Access Markers */}
-                  {beaches.map((b) =>
-                    b.accesses.map((acc) => {
-                      if (typeof acc.latitude !== 'number' || isNaN(acc.latitude) || typeof acc.longitude !== 'number' || isNaN(acc.longitude)) return null;
-                      const isBlocked = acc.blockerType !== 'None';
-                      const isSelected = acc.id === selectedAccessId;
+                    <ZoomControl position="topright" />
+                    <MapEvents onMapClick={handleMapClick} />
+
+                    {/* Polygons */}
+                    {beaches.map((b) => {
+                      if (!b.boundaryPolygon || b.boundaryPolygon.length < 3) return null;
+                      if (b.boundaryPolygon.some(([lat, lng]) => typeof lat !== 'number' || isNaN(lat) || typeof lng !== 'number' || isNaN(lng))) return null;
+                      const isSelected = b.id === selectedBeachId;
+                      const isBlocked = b.accesses.some(a => a.blockerType !== 'None');
 
                       return (
-                        <Marker
-                          key={`marker-${acc.id}`}
-                          position={[acc.latitude, acc.longitude]}
-                          icon={createAccessIcon(isBlocked, isSelected)}
+                        <Polygon
+                          key={`poly-${b.id}`}
+                          positions={b.boundaryPolygon}
+                          pathOptions={{
+                            color: isSelected ? '#F26522' : isBlocked ? '#ef4444' : '#10b981',
+                            fillColor: isSelected ? '#F26522' : isBlocked ? '#ef4444' : '#10b981',
+                            fillOpacity: isSelected ? 0.35 : 0.15,
+                            weight: isSelected ? 3 : 1.5
+                          }}
                           eventHandlers={{
                             click: () => {
                               setSelectedBeachId(b.id);
-                              setSelectedAccessId(acc.id);
+                              setSelectedAccessId(null);
+                              setBeachDetailOpen(true);
+                              setVisibleImagesLimit(4);
+                              loadComments(b.id);
                             }
                           }}
-                        >
-                          <Popup>
-                            <div className="text-gray-900 font-sans p-1 leading-normal text-xs">
-                              <h4 className="font-bold text-gray-955 leading-tight">{acc.name}</h4>
-                              <p className="text-[10px] text-gray-500 font-medium">Playa: {b.name}</p>
-                              <span className={`text-[8.5px] px-1.5 py-0.5 rounded font-bold uppercase mt-1 inline-block text-white ${
-                                isBlocked ? 'bg-red-500' : 'bg-emerald-500'
-                              }`}>
-                                {isBlocked ? 'Bloqueado' : 'Acceso libre'}
-                              </span>
-                            </div>
-                          </Popup>
-                        </Marker>
+                        />
                       );
-                    })
-                  )}
+                    })}
 
-                  {/* Selected access path */}
-                  {selectedAccess && selectedAccess.trailGeometry && selectedAccess.trailGeometry.length > 0 && 
-                   !selectedAccess.trailGeometry.some(([lat, lng]) => typeof lat !== 'number' || isNaN(lat) || typeof lng !== 'number' || isNaN(lng)) && (
-                    <Polyline
-                      positions={selectedAccess.trailGeometry}
-                      pathOptions={{
-                        color: '#319AFF',
-                        weight: 4,
-                        dashArray: '5, 10',
-                        lineCap: 'round',
-                        lineJoin: 'round'
-                      }}
-                    />
-                  )}
+                    {/* Access Markers */}
+                    {beaches.map((b) =>
+                      b.accesses.map((acc) => {
+                        if (typeof acc.latitude !== 'number' || isNaN(acc.latitude) || typeof acc.longitude !== 'number' || isNaN(acc.longitude)) return null;
+                        const isBlocked = acc.blockerType !== 'None';
+                        const isSelected = acc.id === selectedAccessId;
 
-                  {/* Draw polygon points */}
-                  {drawMode === 'beach' && drawingPoints.length > 0 && (
-                    <>
-                      {drawingPoints.map((pt, idx) => (
-                        <Marker
-                          key={`draw-vertex-${idx}`}
-                          position={pt}
-                          icon={L.divIcon({
-                            className: 'w-2.5 h-2.5 rounded-full bg-emerald-500 border border-white shadow-sm',
-                            iconSize: [10, 10]
-                          })}
-                        />
-                      ))}
-                      {drawingPoints.length > 1 && (
-                        <Polygon
-                          positions={drawingPoints}
-                          pathOptions={{
-                            color: '#10b981',
-                            fillColor: '#10b981',
-                            fillOpacity: 0.2,
-                            dashArray: '5, 5'
-                          }}
-                        />
-                      )}
-                    </>
-                  )}
+                        return (
+                          <Marker
+                            key={`marker-${acc.id}`}
+                            position={[acc.latitude, acc.longitude]}
+                            icon={createAccessIcon(isBlocked, isSelected)}
+                            eventHandlers={{
+                              click: () => {
+                                setSelectedBeachId(b.id);
+                                setSelectedAccessId(acc.id);
+                              }
+                            }}
+                          >
+                            <Popup>
+                              <div className="text-gray-900 font-sans p-1 leading-normal text-xs">
+                                <h4 className="font-bold text-gray-955 leading-tight">{acc.name}</h4>
+                                <p className="text-[10px] text-gray-500 font-medium">Playa: {b.name}</p>
+                                <span className={`text-[8.5px] px-1.5 py-0.5 rounded font-bold uppercase mt-1 inline-block text-white ${
+                                  isBlocked ? 'bg-red-500' : 'bg-emerald-500'
+                                }`}>
+                                  {isBlocked ? 'Bloqueado' : 'Acceso libre'}
+                                </span>
+                              </div>
+                            </Popup>
+                          </Marker>
+                        );
+                      })
+                    )}
 
-                  {/* Draw trail path */}
-                  {drawMode === 'trail' && trailDrawingPoints.length > 0 && (
-                    <>
-                      {trailDrawingPoints.map((pt, idx) => (
-                        <Marker
-                          key={`draw-trail-vertex-${idx}`}
-                          position={pt}
-                          icon={L.divIcon({
-                            className: 'w-2 h-2 rounded-full bg-blue-500 border border-white shadow-sm',
-                            iconSize: [8, 8]
-                          })}
-                        />
-                      ))}
-                      {trailDrawingPoints.length > 1 && (
-                        <Polyline
-                          positions={trailDrawingPoints}
-                          pathOptions={{
-                            color: '#319AFF',
-                            weight: 3,
-                            dashArray: '5, 5'
-                          }}
-                        />
-                      )}
-                    </>
-                  )}
+                    {/* Selected access path */}
+                    {selectedAccess && selectedAccess.trailGeometry && selectedAccess.trailGeometry.length > 0 && 
+                     !selectedAccess.trailGeometry.some(([lat, lng]) => typeof lat !== 'number' || isNaN(lat) || typeof lng !== 'number' || isNaN(lng)) && (
+                      <Polyline
+                        positions={selectedAccess.trailGeometry}
+                        pathOptions={{
+                          color: '#319AFF',
+                          weight: 4,
+                          dashArray: '5, 10',
+                          lineCap: 'round',
+                          lineJoin: 'round'
+                        }}
+                      />
+                    )}
 
-                  {/* Access pin target */}
-                  {placedPinCoordinates && (
-                    <Marker
-                      position={placedPinCoordinates}
-                      icon={L.divIcon({
-                        className: 'w-6 h-6 flex items-center justify-center',
-                        html: `<div class="w-4 h-4 bg-orange-500 border-2 border-white rounded-full animate-bounce shadow"></div>`,
-                        iconSize: [24, 24]
-                      })}
-                    />
-                  )}
+                    {/* Draw polygon points */}
+                    {drawMode === 'beach' && drawingPoints.length > 0 && (
+                      <>
+                        {drawingPoints.map((pt, idx) => {
+                          if (typeof pt[0] !== 'number' || isNaN(pt[0]) || typeof pt[1] !== 'number' || isNaN(pt[1])) return null;
+                          return (
+                            <Marker
+                              key={`draw-vertex-${idx}`}
+                              position={pt}
+                              icon={L.divIcon({
+                                className: 'w-2.5 h-2.5 rounded-full bg-emerald-500 border border-white shadow-sm',
+                                iconSize: [10, 10]
+                              })}
+                            />
+                          );
+                        })}
+                        {drawingPoints.length > 1 && !drawingPoints.some(([lat, lng]) => typeof lat !== 'number' || isNaN(lat) || typeof lng !== 'number' || isNaN(lng)) && (
+                          <Polygon
+                            positions={drawingPoints}
+                            pathOptions={{
+                              color: '#10b981',
+                              fillColor: '#10b981',
+                              fillOpacity: 0.2,
+                              dashArray: '5, 5'
+                            }}
+                          />
+                        )}
+                      </>
+                    )}
 
-                </MapContainer>
+                    {/* Draw trail path */}
+                    {drawMode === 'trail' && trailDrawingPoints.length > 0 && (
+                      <>
+                        {trailDrawingPoints.map((pt, idx) => {
+                          if (typeof pt[0] !== 'number' || isNaN(pt[0]) || typeof pt[1] !== 'number' || isNaN(pt[1])) return null;
+                          return (
+                            <Marker
+                              key={`draw-trail-vertex-${idx}`}
+                              position={pt}
+                              icon={L.divIcon({
+                                className: 'w-2 h-2 rounded-full bg-blue-500 border border-white shadow-sm',
+                                iconSize: [8, 8]
+                              })}
+                            />
+                          );
+                        })}
+                        {trailDrawingPoints.length > 1 && !trailDrawingPoints.some(([lat, lng]) => typeof lat !== 'number' || isNaN(lat) || typeof lng !== 'number' || isNaN(lng)) && (
+                          <Polyline
+                            positions={trailDrawingPoints}
+                            pathOptions={{
+                              color: '#319AFF',
+                              weight: 3,
+                              dashArray: '5, 5'
+                            }}
+                          />
+                        )}
+                      </>
+                    )}
+
+                    {/* Access pin target */}
+                    {placedPinCoordinates && 
+                     typeof placedPinCoordinates[0] === 'number' && !isNaN(placedPinCoordinates[0]) && 
+                     typeof placedPinCoordinates[1] === 'number' && !isNaN(placedPinCoordinates[1]) && (
+                      <Marker
+                        position={placedPinCoordinates}
+                        icon={L.divIcon({
+                          className: 'w-6 h-6 flex items-center justify-center',
+                          html: `<div class="w-4 h-4 bg-orange-500 border-2 border-white rounded-full animate-bounce shadow"></div>`,
+                          iconSize: [24, 24]
+                        })}
+                      />
+                    )}
+
+                  </MapContainer>
+                ) : (
+                  <div className="w-full h-full bg-[#151c14] flex flex-col items-center justify-center text-gray-400 gap-2">
+                    <p className="text-xs font-semibold">Cargando mapa interactivo...</p>
+                  </div>
+                )}
               </div>
 
               <div className="absolute bottom-4 right-4 z-[1000] font-mono text-[8.5px] text-gray-400 bg-gray-950/85 px-2.5 py-1.5 rounded-lg border border-gray-850">
