@@ -1,0 +1,12 @@
+connectorId: default-connector
+authMode: PUBLIC
+generate:
+  javascriptSdk:
+    - package: "@playalibre/dataconnect-sdk"
+      outputDir: ../../src/generated/dataconnect
+    - outputDir: ../../src/dataconnect-generated
+      package: "@dataconnect/generated"
+      packageJsonDir: ../..
+      react: true
+      angular: false
+      clientCache: {}

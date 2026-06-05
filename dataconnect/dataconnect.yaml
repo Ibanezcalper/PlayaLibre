@@ -1,0 +1,11 @@
+specVersion: "v1"
+serviceId: "playas-libres-service"
+location: "us-central1"
+schema:
+  source: "./schema"
+  datasource:
+    postgresql:
+      database: "playas_libres_db"
+      cloudSql:
+        instanceId: "playas-libres-db-instance"
+connectorDirs: ["./connector"]

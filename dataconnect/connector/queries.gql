@@ -1,0 +1,169 @@
+# Queries for PlayaLibre (PostgreSQL)
+
+# List all beaches along with their accesses, reports and creators
+query ListBeaches @auth(level: PUBLIC) {
+  beaches {
+    id
+    name
+    state
+    latitude
+    longitude
+    boundaryPolygon
+    images
+    createdAt
+    user {
+      id
+      username
+      avatarUrl
+      reputation
+    }
+    accesses_on_beach {
+      id
+      name
+      latitude
+      longitude
+      trailGeometry
+      images
+      pets
+      shade
+      showers
+      parking
+      security
+      ramps
+      wheelchair
+      parkingReserved
+      alcoholAllowed
+      campingAllowed
+      feeRequired
+      wifi
+      cellular4G
+      blockerType
+      blockerName
+      blockerDescription
+      illegalFeeAmount
+      reputation
+      isPendingCuration
+      createdAt
+      user {
+        id
+        username
+        avatarUrl
+        reputation
+      }
+      reports_on_access {
+        id
+        reporterName
+        blockerType
+        blockerName
+        description
+        hasIllegalFee
+        feeAmount
+        score
+        createdAt
+        user {
+          id
+          username
+          avatarUrl
+          reputation
+        }
+      }
+    }
+  }
+}
+
+# Get detailed beach along with its accesses
+query GetBeachDetails($id: UUID!) @auth(level: PUBLIC) {
+  beach(id: $id) {
+    id
+    name
+    state
+    latitude
+    longitude
+    boundaryPolygon
+    images
+    createdAt
+    user {
+      id
+      username
+      avatarUrl
+      reputation
+    }
+  }
+  accesses(where: { beachId: { eq: $id } }) {
+    id
+    name
+    latitude
+    longitude
+    trailGeometry
+    images
+    pets
+    shade
+    showers
+    parking
+    security
+    ramps
+    wheelchair
+    parkingReserved
+    alcoholAllowed
+    campingAllowed
+    feeRequired
+    wifi
+    cellular4G
+    blockerType
+    blockerName
+    blockerDescription
+    illegalFeeAmount
+    reputation
+    isPendingCuration
+    createdAt
+    user {
+      id
+      username
+      avatarUrl
+      reputation
+    }
+    reports_on_access {
+      id
+      reporterName
+      blockerType
+      blockerName
+      description
+      hasIllegalFee
+      feeAmount
+      score
+      createdAt
+      user {
+        id
+        username
+        avatarUrl
+        reputation
+      }
+    }
+  }
+}
+
+# Get user details
+query GetUser($id: String!) @auth(level: PUBLIC) {
+  user(id: $id) {
+    id
+    username
+    avatarUrl
+    reputation
+    createdAt
+  }
+}
+
+# Get all comments for a beach
+query GetCommentsForBeach($beachId: UUID!) @auth(level: PUBLIC) {
+  comments(where: { beachId: { eq: $beachId } }, orderBy: [{ createdAt: DESC }]) {
+    id
+    text
+    createdAt
+    user {
+      id
+      username
+      avatarUrl
+      reputation
+    }
+  }
+}

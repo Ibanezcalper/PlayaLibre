@@ -1,0 +1,86 @@
+# Database Schema for PlayaLibre (PostgreSQL backed by Firebase SQL Connect)
+
+type User @table {
+  id: String! # Matches request.auth.uid (Firebase Auth ID)
+  username: String!
+  avatarUrl: String
+  reputation: Int! @default(value: 0)
+  createdAt: Date! @default(expr: "request.time")
+}
+
+type Beach @table {
+  id: UUID! @default(expr: "uuidV4()")
+  name: String!
+  state: String!
+  latitude: Float!
+  longitude: Float!
+  boundaryPolygon: Any
+  images: Any
+  user: User
+  createdAt: Date! @default(expr: "request.time")
+}
+
+type Access @table {
+  id: UUID! @default(expr: "uuidV4()")
+  beach: Beach!
+  name: String!
+  latitude: Float!
+  longitude: Float!
+  trailGeometry: Any
+  images: Any
+  user: User
+  
+  # Access point features
+  pets: Boolean! @default(value: false)
+  shade: Boolean! @default(value: false)
+  showers: Boolean! @default(value: false)
+  parking: Boolean! @default(value: false)
+  security: Boolean! @default(value: false)
+  
+  # Accessibility
+  ramps: Boolean! @default(value: false)
+  wheelchair: Boolean! @default(value: false)
+  parkingReserved: Boolean! @default(value: false)
+  
+  # Policies
+  alcoholAllowed: Boolean! @default(value: true)
+  campingAllowed: Boolean! @default(value: false)
+  feeRequired: Boolean! @default(value: false)
+  
+  # Connectivity
+  wifi: Boolean! @default(value: false)
+  cellular4G: Boolean! @default(value: true)
+  
+  # Blocker / privatización details at access level
+  blockerType: String! @default(value: "None") # None, Hotel, Condo, Restaurant, Beach Club, Private Property, Insecurity, Other
+  blockerName: String
+  blockerDescription: String
+  illegalFeeAmount: Float! @default(value: 0.0)
+  
+  # Reputation and Curation state
+  reputation: Int! @default(value: 90)
+  isPendingCuration: Boolean! @default(value: true)
+  createdAt: Date! @default(expr: "request.time")
+}
+
+type Report @table {
+  id: UUID! @default(expr: "uuidV4()")
+  access: Access!
+  reporterName: String! @default(value: "Anónimo")
+  blockerType: String!
+  blockerName: String!
+  description: String!
+  hasIllegalFee: Boolean! @default(value: false)
+  feeAmount: Float @default(value: 0.0)
+  score: Int! @default(value: 1)
+  user: User
+  createdAt: Date! @default(expr: "request.time")
+}
+
+type Comment @table {
+  id: UUID! @default(expr: "uuidV4()")
+  beach: Beach!
+  user: User!
+  text: String!
+  createdAt: Date! @default(expr: "request.time")
+}

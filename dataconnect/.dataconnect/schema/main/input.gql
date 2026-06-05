@@ -1,0 +1,2517 @@
+"""
+✨ `Access_KeyOutput` returns the primary key fields of table type `Access`.
+
+It has the same format as `Access_Key`, but is only used as mutation return value.
+"""
+scalar Access_KeyOutput
+"""
+✨ `Beach_KeyOutput` returns the primary key fields of table type `Beach`.
+
+It has the same format as `Beach_Key`, but is only used as mutation return value.
+"""
+scalar Beach_KeyOutput
+"""
+✨ `Comment_KeyOutput` returns the primary key fields of table type `Comment`.
+
+It has the same format as `Comment_Key`, but is only used as mutation return value.
+"""
+scalar Comment_KeyOutput
+"""
+✨ `Report_KeyOutput` returns the primary key fields of table type `Report`.
+
+It has the same format as `Report_Key`, but is only used as mutation return value.
+"""
+scalar Report_KeyOutput
+"""
+✨ `User_KeyOutput` returns the primary key fields of table type `User`.
+
+It has the same format as `User_Key`, but is only used as mutation return value.
+"""
+scalar User_KeyOutput
+"""
+✨ Generated data input type for table 'Access'. It includes all necessary fields for creating or upserting rows into table.
+"""
+input Access_Data {
+  """
+  ✨ Generated from Field `Access`.`id` of type `UUID!`
+  """
+  id: UUID
+  """
+  ✨ `_expr` server value variant of `id` (✨ Generated from Field `Access`.`id` of type `UUID!`)
+  """
+  id_expr: UUID_Expr
+  """
+  ✨ Generated from Field `Access`.`beachId` of type `UUID!`
+  """
+  beachId: UUID
+  """
+  ✨ `_expr` server value variant of `beachId` (✨ Generated from Field `Access`.`beachId` of type `UUID!`)
+  """
+  beachId_expr: UUID_Expr
+  """
+  ✨ Generated from Field `Access`.`userId` of type `String`
+  """
+  userId: String
+  """
+  ✨ `_expr` server value variant of `userId` (✨ Generated from Field `Access`.`userId` of type `String`)
+  """
+  userId_expr: String_Expr
+  """
+  ✨ Generated from Field `Access`.`beach` of type `Beach!`
+  """
+  beach: Beach_Key
+  """
+  ✨ Generated from Field `Access`.`user` of type `User`
+  """
+  user: User_Key
+  """
+  ✨ Generated from Field `Access`.`alcoholAllowed` of type `Boolean!`
+  """
+  alcoholAllowed: Boolean
+  """
+  ✨ `_expr` server value variant of `alcoholAllowed` (✨ Generated from Field `Access`.`alcoholAllowed` of type `Boolean!`)
+  """
+  alcoholAllowed_expr: Boolean_Expr
+  """
+  ✨ Generated from Field `Access`.`blockerDescription` of type `String`
+  """
+  blockerDescription: String
+  """
+  ✨ `_expr` server value variant of `blockerDescription` (✨ Generated from Field `Access`.`blockerDescription` of type `String`)
+  """
+  blockerDescription_expr: String_Expr
+  """
+  ✨ Generated from Field `Access`.`blockerName` of type `String`
+  """
+  blockerName: String
+  """
+  ✨ `_expr` server value variant of `blockerName` (✨ Generated from Field `Access`.`blockerName` of type `String`)
+  """
+  blockerName_expr: String_Expr
+  """
+  ✨ Generated from Field `Access`.`blockerType` of type `String!`
+  """
+  blockerType: String
+  """
+  ✨ `_expr` server value variant of `blockerType` (✨ Generated from Field `Access`.`blockerType` of type `String!`)
+  """
+  blockerType_expr: String_Expr
+  """
+  ✨ Generated from Field `Access`.`campingAllowed` of type `Boolean!`
+  """
+  campingAllowed: Boolean
+  """
+  ✨ `_expr` server value variant of `campingAllowed` (✨ Generated from Field `Access`.`campingAllowed` of type `Boolean!`)
+  """
+  campingAllowed_expr: Boolean_Expr
+  """
+  ✨ Generated from Field `Access`.`cellular4G` of type `Boolean!`
+  """
+  cellular4G: Boolean
+  """
+  ✨ `_expr` server value variant of `cellular4G` (✨ Generated from Field `Access`.`cellular4G` of type `Boolean!`)
+  """
+  cellular4G_expr: Boolean_Expr
+  """
+  ✨ Generated from Field `Access`.`createdAt` of type `Date!`
+  """
+  createdAt: Date
+  """
+  ✨ `_date` server value variant of `createdAt` (✨ Generated from Field `Access`.`createdAt` of type `Date!`)
+  """
+  createdAt_date: Date_Relative
+  """
+  ✨ `_expr` server value variant of `createdAt` (✨ Generated from Field `Access`.`createdAt` of type `Date!`)
+  """
+  createdAt_expr: Date_Expr
+  """
+  ✨ `_update` server value variant of `createdAt` (✨ Generated from Field `Access`.`createdAt` of type `Date!`)
+  """
+  createdAt_update: [Date_Update!]
+  """
+  ✨ Generated from Field `Access`.`feeRequired` of type `Boolean!`
+  """
+  feeRequired: Boolean
+  """
+  ✨ `_expr` server value variant of `feeRequired` (✨ Generated from Field `Access`.`feeRequired` of type `Boolean!`)
+  """
+  feeRequired_expr: Boolean_Expr
+  """
+  ✨ Generated from Field `Access`.`illegalFeeAmount` of type `Float!`
+  """
+  illegalFeeAmount: Float
+  """
+  ✨ `_expr` server value variant of `illegalFeeAmount` (✨ Generated from Field `Access`.`illegalFeeAmount` of type `Float!`)
+  """
+  illegalFeeAmount_expr: Float_Expr
+  """
+  ✨ `_update` server value variant of `illegalFeeAmount` (✨ Generated from Field `Access`.`illegalFeeAmount` of type `Float!`)
+  """
+  illegalFeeAmount_update: [Float_Update!]
+  """
+  ✨ Generated from Field `Access`.`images` of type `Any`
+  """
+  images: Any
+  """
+  ✨ `_expr` server value variant of `images` (✨ Generated from Field `Access`.`images` of type `Any`)
+  """
+  images_expr: Any_Expr
+  """
+  ✨ Generated from Field `Access`.`isPendingCuration` of type `Boolean!`
+  """
+  isPendingCuration: Boolean
+  """
+  ✨ `_expr` server value variant of `isPendingCuration` (✨ Generated from Field `Access`.`isPendingCuration` of type `Boolean!`)
+  """
+  isPendingCuration_expr: Boolean_Expr
+  """
+  ✨ Generated from Field `Access`.`latitude` of type `Float!`
+  """
+  latitude: Float
+  """
+  ✨ `_expr` server value variant of `latitude` (✨ Generated from Field `Access`.`latitude` of type `Float!`)
+  """
+  latitude_expr: Float_Expr
+  """
+  ✨ `_update` server value variant of `latitude` (✨ Generated from Field `Access`.`latitude` of type `Float!`)
+  """
+  latitude_update: [Float_Update!]
+  """
+  ✨ Generated from Field `Access`.`longitude` of type `Float!`
+  """
+  longitude: Float
+  """
+  ✨ `_expr` server value variant of `longitude` (✨ Generated from Field `Access`.`longitude` of type `Float!`)
+  """
+  longitude_expr: Float_Expr
+  """
+  ✨ `_update` server value variant of `longitude` (✨ Generated from Field `Access`.`longitude` of type `Float!`)
+  """
+  longitude_update: [Float_Update!]
+  """
+  ✨ Generated from Field `Access`.`name` of type `String!`
+  """
+  name: String
+  """
+  ✨ `_expr` server value variant of `name` (✨ Generated from Field `Access`.`name` of type `String!`)
+  """
+  name_expr: String_Expr
+  """
+  ✨ Generated from Field `Access`.`parking` of type `Boolean!`
+  """
+  parking: Boolean
+  """
+  ✨ `_expr` server value variant of `parking` (✨ Generated from Field `Access`.`parking` of type `Boolean!`)
+  """
+  parking_expr: Boolean_Expr
+  """
+  ✨ Generated from Field `Access`.`parkingReserved` of type `Boolean!`
+  """
+  parkingReserved: Boolean
+  """
+  ✨ `_expr` server value variant of `parkingReserved` (✨ Generated from Field `Access`.`parkingReserved` of type `Boolean!`)
+  """
+  parkingReserved_expr: Boolean_Expr
+  """
+  ✨ Generated from Field `Access`.`pets` of type `Boolean!`
+  """
+  pets: Boolean
+  """
+  ✨ `_expr` server value variant of `pets` (✨ Generated from Field `Access`.`pets` of type `Boolean!`)
+  """
+  pets_expr: Boolean_Expr
+  """
+  ✨ Generated from Field `Access`.`ramps` of type `Boolean!`
+  """
+  ramps: Boolean
+  """
+  ✨ `_expr` server value variant of `ramps` (✨ Generated from Field `Access`.`ramps` of type `Boolean!`)
+  """
+  ramps_expr: Boolean_Expr
+  """
+  ✨ Generated from Field `Access`.`reputation` of type `Int!`
+  """
+  reputation: Int
+  """
+  ✨ `_expr` server value variant of `reputation` (✨ Generated from Field `Access`.`reputation` of type `Int!`)
+  """
+  reputation_expr: Int_Expr
+  """
+  ✨ `_update` server value variant of `reputation` (✨ Generated from Field `Access`.`reputation` of type `Int!`)
+  """
+  reputation_update: [Int_Update!]
+  """
+  ✨ Generated from Field `Access`.`security` of type `Boolean!`
+  """
+  security: Boolean
+  """
+  ✨ `_expr` server value variant of `security` (✨ Generated from Field `Access`.`security` of type `Boolean!`)
+  """
+  security_expr: Boolean_Expr
+  """
+  ✨ Generated from Field `Access`.`shade` of type `Boolean!`
+  """
+  shade: Boolean
+  """
+  ✨ `_expr` server value variant of `shade` (✨ Generated from Field `Access`.`shade` of type `Boolean!`)
+  """
+  shade_expr: Boolean_Expr
+  """
+  ✨ Generated from Field `Access`.`showers` of type `Boolean!`
+  """
+  showers: Boolean
+  """
+  ✨ `_expr` server value variant of `showers` (✨ Generated from Field `Access`.`showers` of type `Boolean!`)
+  """
+  showers_expr: Boolean_Expr
+  """
+  ✨ Generated from Field `Access`.`trailGeometry` of type `Any`
+  """
+  trailGeometry: Any
+  """
+  ✨ `_expr` server value variant of `trailGeometry` (✨ Generated from Field `Access`.`trailGeometry` of type `Any`)
+  """
+  trailGeometry_expr: Any_Expr
+  """
+  ✨ Generated from Field `Access`.`wheelchair` of type `Boolean!`
+  """
+  wheelchair: Boolean
+  """
+  ✨ `_expr` server value variant of `wheelchair` (✨ Generated from Field `Access`.`wheelchair` of type `Boolean!`)
+  """
+  wheelchair_expr: Boolean_Expr
+  """
+  ✨ Generated from Field `Access`.`wifi` of type `Boolean!`
+  """
+  wifi: Boolean
+  """
+  ✨ `_expr` server value variant of `wifi` (✨ Generated from Field `Access`.`wifi` of type `Boolean!`)
+  """
+  wifi_expr: Boolean_Expr
+}
+"""
+✨ Generated filter input type for table 'Access'. This input allows filtering objects using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input Access_Filter {
+  """
+  Apply multiple filter conditions using `AND` logic.
+  """
+  _and: [Access_Filter!]
+  """
+  Negate the result of the provided filter condition.
+  """
+  _not: Access_Filter
+  """
+  Apply multiple filter conditions using `OR` logic.
+  """
+  _or: [Access_Filter!]
+  """
+  ✨ Generated from Field `Access`.`id` of type `UUID!`
+  """
+  id: UUID_Filter
+  """
+  ✨ Generated from Field `Access`.`beachId` of type `UUID!`
+  """
+  beachId: UUID_Filter
+  """
+  ✨ Generated from Field `Access`.`userId` of type `String`
+  """
+  userId: String_Filter
+  """
+  ✨ Generated from Field `Access`.`beach` of type `Beach!`
+  """
+  beach: Beach_Filter
+  """
+  ✨ Generated from Field `Access`.`user` of type `User`
+  """
+  user: User_Filter
+  """
+  ✨ Generated from Field `Access`.`alcoholAllowed` of type `Boolean!`
+  """
+  alcoholAllowed: Boolean_Filter
+  """
+  ✨ Generated from Field `Access`.`blockerDescription` of type `String`
+  """
+  blockerDescription: String_Filter
+  """
+  ✨ Generated from Field `Access`.`blockerName` of type `String`
+  """
+  blockerName: String_Filter
+  """
+  ✨ Generated from Field `Access`.`blockerType` of type `String!`
+  """
+  blockerType: String_Filter
+  """
+  ✨ Generated from Field `Access`.`campingAllowed` of type `Boolean!`
+  """
+  campingAllowed: Boolean_Filter
+  """
+  ✨ Generated from Field `Access`.`cellular4G` of type `Boolean!`
+  """
+  cellular4G: Boolean_Filter
+  """
+  ✨ Generated from Field `Access`.`createdAt` of type `Date!`
+  """
+  createdAt: Date_Filter
+  """
+  ✨ Generated from Field `Access`.`feeRequired` of type `Boolean!`
+  """
+  feeRequired: Boolean_Filter
+  """
+  ✨ Generated from Field `Access`.`illegalFeeAmount` of type `Float!`
+  """
+  illegalFeeAmount: Float_Filter
+  """
+  ✨ Generated from Field `Access`.`images` of type `Any`
+  """
+  images: Any_Filter
+  """
+  ✨ Generated from Field `Access`.`isPendingCuration` of type `Boolean!`
+  """
+  isPendingCuration: Boolean_Filter
+  """
+  ✨ Generated from Field `Access`.`latitude` of type `Float!`
+  """
+  latitude: Float_Filter
+  """
+  ✨ Generated from Field `Access`.`longitude` of type `Float!`
+  """
+  longitude: Float_Filter
+  """
+  ✨ Generated from Field `Access`.`name` of type `String!`
+  """
+  name: String_Filter
+  """
+  ✨ Generated from Field `Access`.`parking` of type `Boolean!`
+  """
+  parking: Boolean_Filter
+  """
+  ✨ Generated from Field `Access`.`parkingReserved` of type `Boolean!`
+  """
+  parkingReserved: Boolean_Filter
+  """
+  ✨ Generated from Field `Access`.`pets` of type `Boolean!`
+  """
+  pets: Boolean_Filter
+  """
+  ✨ Generated from Field `Access`.`ramps` of type `Boolean!`
+  """
+  ramps: Boolean_Filter
+  """
+  ✨ Generated from Field `Access`.`reputation` of type `Int!`
+  """
+  reputation: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`security` of type `Boolean!`
+  """
+  security: Boolean_Filter
+  """
+  ✨ Generated from Field `Access`.`shade` of type `Boolean!`
+  """
+  shade: Boolean_Filter
+  """
+  ✨ Generated from Field `Access`.`showers` of type `Boolean!`
+  """
+  showers: Boolean_Filter
+  """
+  ✨ Generated from Field `Access`.`trailGeometry` of type `Any`
+  """
+  trailGeometry: Any_Filter
+  """
+  ✨ Generated from Field `Access`.`wheelchair` of type `Boolean!`
+  """
+  wheelchair: Boolean_Filter
+  """
+  ✨ Generated from Field `Access`.`wifi` of type `Boolean!`
+  """
+  wifi: Boolean_Filter
+  """
+  ✨ Generated from Field `Access`.`reports_on_access` of type `[Report!]!`
+  """
+  reports_on_access: Report_ListFilter
+}
+"""
+✨ Generated first-row input type for table 'Access'. This input selects the first row matching the filter criteria, ordered according to the specified conditions.
+"""
+input Access_FirstRow {
+  """
+  Order the result by the specified fields.
+  """
+  orderBy: [Access_Order!]
+  """
+  Filters rows based on the specified conditions.
+  """
+  where: Access_Filter
+}
+"""
+✨ Generated having input type for table 'Access'. This input allows you to filter groups during aggregate queries using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input Access_Having {
+  """
+  Apply multiple Having conditions using `AND` logic.
+  """
+  _and: [Access_Having!]
+  """
+  Whether to apply DISTINCT to the aggregate function.
+  """
+  _distinct: Boolean
+  """
+  Negate the result of the provided Having condition.
+  """
+  _not: Access_Having
+  """
+  Apply multiple Having conditions using `OR` logic.
+  """
+  _or: [Access_Having!]
+  """
+  ✨ Generated from Field `Access`.`_count` of type `Int!`
+  """
+  _count: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`alcoholAllowed_count` of type `Int!`
+  """
+  alcoholAllowed_count: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`beachId_count` of type `Int!`
+  """
+  beachId_count: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`blockerDescription_count` of type `Int!`
+  """
+  blockerDescription_count: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`blockerName_count` of type `Int!`
+  """
+  blockerName_count: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`blockerType_count` of type `Int!`
+  """
+  blockerType_count: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`campingAllowed_count` of type `Int!`
+  """
+  campingAllowed_count: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`cellular4G_count` of type `Int!`
+  """
+  cellular4G_count: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`createdAt_count` of type `Int!`
+  """
+  createdAt_count: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`feeRequired_count` of type `Int!`
+  """
+  feeRequired_count: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`id_count` of type `Int!`
+  """
+  id_count: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`illegalFeeAmount_count` of type `Int!`
+  """
+  illegalFeeAmount_count: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`images_count` of type `Int!`
+  """
+  images_count: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`isPendingCuration_count` of type `Int!`
+  """
+  isPendingCuration_count: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`latitude_count` of type `Int!`
+  """
+  latitude_count: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`longitude_count` of type `Int!`
+  """
+  longitude_count: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`name_count` of type `Int!`
+  """
+  name_count: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`parkingReserved_count` of type `Int!`
+  """
+  parkingReserved_count: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`parking_count` of type `Int!`
+  """
+  parking_count: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`pets_count` of type `Int!`
+  """
+  pets_count: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`ramps_count` of type `Int!`
+  """
+  ramps_count: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`reputation_count` of type `Int!`
+  """
+  reputation_count: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`security_count` of type `Int!`
+  """
+  security_count: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`shade_count` of type `Int!`
+  """
+  shade_count: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`showers_count` of type `Int!`
+  """
+  showers_count: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`trailGeometry_count` of type `Int!`
+  """
+  trailGeometry_count: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`userId_count` of type `Int!`
+  """
+  userId_count: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`wheelchair_count` of type `Int!`
+  """
+  wheelchair_count: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`wifi_count` of type `Int!`
+  """
+  wifi_count: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`illegalFeeAmount_sum` of type `Float`
+  """
+  illegalFeeAmount_sum: Float_Filter
+  """
+  ✨ Generated from Field `Access`.`latitude_sum` of type `Float`
+  """
+  latitude_sum: Float_Filter
+  """
+  ✨ Generated from Field `Access`.`longitude_sum` of type `Float`
+  """
+  longitude_sum: Float_Filter
+  """
+  ✨ Generated from Field `Access`.`reputation_sum` of type `Int`
+  """
+  reputation_sum: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`illegalFeeAmount_avg` of type `Float`
+  """
+  illegalFeeAmount_avg: Float_Filter
+  """
+  ✨ Generated from Field `Access`.`latitude_avg` of type `Float`
+  """
+  latitude_avg: Float_Filter
+  """
+  ✨ Generated from Field `Access`.`longitude_avg` of type `Float`
+  """
+  longitude_avg: Float_Filter
+  """
+  ✨ Generated from Field `Access`.`reputation_avg` of type `Float`
+  """
+  reputation_avg: Float_Filter
+  """
+  ✨ Generated from Field `Access`.`createdAt_min` of type `Date`
+  """
+  createdAt_min: Date_Filter
+  """
+  ✨ Generated from Field `Access`.`illegalFeeAmount_min` of type `Float`
+  """
+  illegalFeeAmount_min: Float_Filter
+  """
+  ✨ Generated from Field `Access`.`images_min` of type `Any`
+  """
+  images_min: Any_Filter
+  """
+  ✨ Generated from Field `Access`.`latitude_min` of type `Float`
+  """
+  latitude_min: Float_Filter
+  """
+  ✨ Generated from Field `Access`.`longitude_min` of type `Float`
+  """
+  longitude_min: Float_Filter
+  """
+  ✨ Generated from Field `Access`.`reputation_min` of type `Int`
+  """
+  reputation_min: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`trailGeometry_min` of type `Any`
+  """
+  trailGeometry_min: Any_Filter
+  """
+  ✨ Generated from Field `Access`.`createdAt_max` of type `Date`
+  """
+  createdAt_max: Date_Filter
+  """
+  ✨ Generated from Field `Access`.`illegalFeeAmount_max` of type `Float`
+  """
+  illegalFeeAmount_max: Float_Filter
+  """
+  ✨ Generated from Field `Access`.`images_max` of type `Any`
+  """
+  images_max: Any_Filter
+  """
+  ✨ Generated from Field `Access`.`latitude_max` of type `Float`
+  """
+  latitude_max: Float_Filter
+  """
+  ✨ Generated from Field `Access`.`longitude_max` of type `Float`
+  """
+  longitude_max: Float_Filter
+  """
+  ✨ Generated from Field `Access`.`reputation_max` of type `Int`
+  """
+  reputation_max: Int_Filter
+  """
+  ✨ Generated from Field `Access`.`trailGeometry_max` of type `Any`
+  """
+  trailGeometry_max: Any_Filter
+}
+"""
+✨ Generated key input type for table 'Access'. It represents the primary key fields used to uniquely identify a row in the table.
+"""
+input Access_Key {
+  """
+  ✨ Generated from Field `Access`.`id` of type `UUID!`
+  """
+  id: UUID
+  """
+  ✨ `_expr` server value variant of `id` (✨ Generated from Field `Access`.`id` of type `UUID!`)
+  """
+  id_expr: UUID_Expr
+}
+"""
+✨ Generated list filter input type for table 'Access'. This input applies filtering logic based on the count or existence of related objects that matches certain criteria.
+"""
+input Access_ListFilter {
+  """
+  The desired number of objects that match the condition (defaults to at least one).
+  """
+  count: Int_Filter = {gt:0}
+  """
+  Condition of the related objects to filter for.
+  """
+  exist: Access_Filter
+}
+"""
+✨ Generated order input type for table 'Access'. This input defines the sorting order of rows in query results based on one or more fields.
+"""
+input Access_Order {
+  """
+  ✨ Generated from Field `Access`.`id` of type `UUID!`
+  """
+  id: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`beachId` of type `UUID!`
+  """
+  beachId: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`userId` of type `String`
+  """
+  userId: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`beach` of type `Beach!`
+  """
+  beach: Beach_Order
+  """
+  ✨ Generated from Field `Access`.`user` of type `User`
+  """
+  user: User_Order
+  """
+  ✨ Generated from Field `Access`.`alcoholAllowed` of type `Boolean!`
+  """
+  alcoholAllowed: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`blockerDescription` of type `String`
+  """
+  blockerDescription: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`blockerName` of type `String`
+  """
+  blockerName: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`blockerType` of type `String!`
+  """
+  blockerType: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`campingAllowed` of type `Boolean!`
+  """
+  campingAllowed: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`cellular4G` of type `Boolean!`
+  """
+  cellular4G: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`createdAt` of type `Date!`
+  """
+  createdAt: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`feeRequired` of type `Boolean!`
+  """
+  feeRequired: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`illegalFeeAmount` of type `Float!`
+  """
+  illegalFeeAmount: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`images` of type `Any`
+  """
+  images: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`isPendingCuration` of type `Boolean!`
+  """
+  isPendingCuration: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`latitude` of type `Float!`
+  """
+  latitude: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`longitude` of type `Float!`
+  """
+  longitude: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`name` of type `String!`
+  """
+  name: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`parking` of type `Boolean!`
+  """
+  parking: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`parkingReserved` of type `Boolean!`
+  """
+  parkingReserved: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`pets` of type `Boolean!`
+  """
+  pets: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`ramps` of type `Boolean!`
+  """
+  ramps: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`reputation` of type `Int!`
+  """
+  reputation: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`security` of type `Boolean!`
+  """
+  security: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`shade` of type `Boolean!`
+  """
+  shade: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`showers` of type `Boolean!`
+  """
+  showers: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`trailGeometry` of type `Any`
+  """
+  trailGeometry: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`wheelchair` of type `Boolean!`
+  """
+  wheelchair: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`wifi` of type `Boolean!`
+  """
+  wifi: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`_count` of type `Int!`
+  """
+  _count: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`alcoholAllowed_count` of type `Int!`
+  """
+  alcoholAllowed_count: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`beachId_count` of type `Int!`
+  """
+  beachId_count: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`blockerDescription_count` of type `Int!`
+  """
+  blockerDescription_count: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`blockerName_count` of type `Int!`
+  """
+  blockerName_count: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`blockerType_count` of type `Int!`
+  """
+  blockerType_count: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`campingAllowed_count` of type `Int!`
+  """
+  campingAllowed_count: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`cellular4G_count` of type `Int!`
+  """
+  cellular4G_count: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`createdAt_count` of type `Int!`
+  """
+  createdAt_count: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`feeRequired_count` of type `Int!`
+  """
+  feeRequired_count: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`id_count` of type `Int!`
+  """
+  id_count: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`illegalFeeAmount_count` of type `Int!`
+  """
+  illegalFeeAmount_count: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`images_count` of type `Int!`
+  """
+  images_count: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`isPendingCuration_count` of type `Int!`
+  """
+  isPendingCuration_count: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`latitude_count` of type `Int!`
+  """
+  latitude_count: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`longitude_count` of type `Int!`
+  """
+  longitude_count: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`name_count` of type `Int!`
+  """
+  name_count: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`parkingReserved_count` of type `Int!`
+  """
+  parkingReserved_count: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`parking_count` of type `Int!`
+  """
+  parking_count: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`pets_count` of type `Int!`
+  """
+  pets_count: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`ramps_count` of type `Int!`
+  """
+  ramps_count: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`reputation_count` of type `Int!`
+  """
+  reputation_count: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`security_count` of type `Int!`
+  """
+  security_count: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`shade_count` of type `Int!`
+  """
+  shade_count: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`showers_count` of type `Int!`
+  """
+  showers_count: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`trailGeometry_count` of type `Int!`
+  """
+  trailGeometry_count: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`userId_count` of type `Int!`
+  """
+  userId_count: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`wheelchair_count` of type `Int!`
+  """
+  wheelchair_count: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`wifi_count` of type `Int!`
+  """
+  wifi_count: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`illegalFeeAmount_sum` of type `Float`
+  """
+  illegalFeeAmount_sum: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`latitude_sum` of type `Float`
+  """
+  latitude_sum: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`longitude_sum` of type `Float`
+  """
+  longitude_sum: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`reputation_sum` of type `Int`
+  """
+  reputation_sum: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`illegalFeeAmount_avg` of type `Float`
+  """
+  illegalFeeAmount_avg: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`latitude_avg` of type `Float`
+  """
+  latitude_avg: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`longitude_avg` of type `Float`
+  """
+  longitude_avg: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`reputation_avg` of type `Float`
+  """
+  reputation_avg: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`createdAt_min` of type `Date`
+  """
+  createdAt_min: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`illegalFeeAmount_min` of type `Float`
+  """
+  illegalFeeAmount_min: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`images_min` of type `Any`
+  """
+  images_min: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`latitude_min` of type `Float`
+  """
+  latitude_min: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`longitude_min` of type `Float`
+  """
+  longitude_min: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`reputation_min` of type `Int`
+  """
+  reputation_min: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`trailGeometry_min` of type `Any`
+  """
+  trailGeometry_min: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`createdAt_max` of type `Date`
+  """
+  createdAt_max: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`illegalFeeAmount_max` of type `Float`
+  """
+  illegalFeeAmount_max: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`images_max` of type `Any`
+  """
+  images_max: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`latitude_max` of type `Float`
+  """
+  latitude_max: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`longitude_max` of type `Float`
+  """
+  longitude_max: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`reputation_max` of type `Int`
+  """
+  reputation_max: OrderDirection
+  """
+  ✨ Generated from Field `Access`.`trailGeometry_max` of type `Any`
+  """
+  trailGeometry_max: OrderDirection
+}
+"""
+✨ Generated data input type for table 'Beach'. It includes all necessary fields for creating or upserting rows into table.
+"""
+input Beach_Data {
+  """
+  ✨ Generated from Field `Beach`.`id` of type `UUID!`
+  """
+  id: UUID
+  """
+  ✨ `_expr` server value variant of `id` (✨ Generated from Field `Beach`.`id` of type `UUID!`)
+  """
+  id_expr: UUID_Expr
+  """
+  ✨ Generated from Field `Beach`.`userId` of type `String`
+  """
+  userId: String
+  """
+  ✨ `_expr` server value variant of `userId` (✨ Generated from Field `Beach`.`userId` of type `String`)
+  """
+  userId_expr: String_Expr
+  """
+  ✨ Generated from Field `Beach`.`user` of type `User`
+  """
+  user: User_Key
+  """
+  ✨ Generated from Field `Beach`.`boundaryPolygon` of type `Any`
+  """
+  boundaryPolygon: Any
+  """
+  ✨ `_expr` server value variant of `boundaryPolygon` (✨ Generated from Field `Beach`.`boundaryPolygon` of type `Any`)
+  """
+  boundaryPolygon_expr: Any_Expr
+  """
+  ✨ Generated from Field `Beach`.`createdAt` of type `Date!`
+  """
+  createdAt: Date
+  """
+  ✨ `_date` server value variant of `createdAt` (✨ Generated from Field `Beach`.`createdAt` of type `Date!`)
+  """
+  createdAt_date: Date_Relative
+  """
+  ✨ `_expr` server value variant of `createdAt` (✨ Generated from Field `Beach`.`createdAt` of type `Date!`)
+  """
+  createdAt_expr: Date_Expr
+  """
+  ✨ `_update` server value variant of `createdAt` (✨ Generated from Field `Beach`.`createdAt` of type `Date!`)
+  """
+  createdAt_update: [Date_Update!]
+  """
+  ✨ Generated from Field `Beach`.`images` of type `Any`
+  """
+  images: Any
+  """
+  ✨ `_expr` server value variant of `images` (✨ Generated from Field `Beach`.`images` of type `Any`)
+  """
+  images_expr: Any_Expr
+  """
+  ✨ Generated from Field `Beach`.`latitude` of type `Float!`
+  """
+  latitude: Float
+  """
+  ✨ `_expr` server value variant of `latitude` (✨ Generated from Field `Beach`.`latitude` of type `Float!`)
+  """
+  latitude_expr: Float_Expr
+  """
+  ✨ `_update` server value variant of `latitude` (✨ Generated from Field `Beach`.`latitude` of type `Float!`)
+  """
+  latitude_update: [Float_Update!]
+  """
+  ✨ Generated from Field `Beach`.`longitude` of type `Float!`
+  """
+  longitude: Float
+  """
+  ✨ `_expr` server value variant of `longitude` (✨ Generated from Field `Beach`.`longitude` of type `Float!`)
+  """
+  longitude_expr: Float_Expr
+  """
+  ✨ `_update` server value variant of `longitude` (✨ Generated from Field `Beach`.`longitude` of type `Float!`)
+  """
+  longitude_update: [Float_Update!]
+  """
+  ✨ Generated from Field `Beach`.`name` of type `String!`
+  """
+  name: String
+  """
+  ✨ `_expr` server value variant of `name` (✨ Generated from Field `Beach`.`name` of type `String!`)
+  """
+  name_expr: String_Expr
+  """
+  ✨ Generated from Field `Beach`.`state` of type `String!`
+  """
+  state: String
+  """
+  ✨ `_expr` server value variant of `state` (✨ Generated from Field `Beach`.`state` of type `String!`)
+  """
+  state_expr: String_Expr
+}
+"""
+✨ Generated filter input type for table 'Beach'. This input allows filtering objects using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input Beach_Filter {
+  """
+  Apply multiple filter conditions using `AND` logic.
+  """
+  _and: [Beach_Filter!]
+  """
+  Negate the result of the provided filter condition.
+  """
+  _not: Beach_Filter
+  """
+  Apply multiple filter conditions using `OR` logic.
+  """
+  _or: [Beach_Filter!]
+  """
+  ✨ Generated from Field `Beach`.`id` of type `UUID!`
+  """
+  id: UUID_Filter
+  """
+  ✨ Generated from Field `Beach`.`userId` of type `String`
+  """
+  userId: String_Filter
+  """
+  ✨ Generated from Field `Beach`.`user` of type `User`
+  """
+  user: User_Filter
+  """
+  ✨ Generated from Field `Beach`.`boundaryPolygon` of type `Any`
+  """
+  boundaryPolygon: Any_Filter
+  """
+  ✨ Generated from Field `Beach`.`createdAt` of type `Date!`
+  """
+  createdAt: Date_Filter
+  """
+  ✨ Generated from Field `Beach`.`images` of type `Any`
+  """
+  images: Any_Filter
+  """
+  ✨ Generated from Field `Beach`.`latitude` of type `Float!`
+  """
+  latitude: Float_Filter
+  """
+  ✨ Generated from Field `Beach`.`longitude` of type `Float!`
+  """
+  longitude: Float_Filter
+  """
+  ✨ Generated from Field `Beach`.`name` of type `String!`
+  """
+  name: String_Filter
+  """
+  ✨ Generated from Field `Beach`.`state` of type `String!`
+  """
+  state: String_Filter
+  """
+  ✨ Generated from Field `Beach`.`accesses_on_beach` of type `[Access!]!`
+  """
+  accesses_on_beach: Access_ListFilter
+  """
+  ✨ Generated from Field `Beach`.`comments_on_beach` of type `[Comment!]!`
+  """
+  comments_on_beach: Comment_ListFilter
+}
+"""
+✨ Generated first-row input type for table 'Beach'. This input selects the first row matching the filter criteria, ordered according to the specified conditions.
+"""
+input Beach_FirstRow {
+  """
+  Order the result by the specified fields.
+  """
+  orderBy: [Beach_Order!]
+  """
+  Filters rows based on the specified conditions.
+  """
+  where: Beach_Filter
+}
+"""
+✨ Generated having input type for table 'Beach'. This input allows you to filter groups during aggregate queries using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input Beach_Having {
+  """
+  Apply multiple Having conditions using `AND` logic.
+  """
+  _and: [Beach_Having!]
+  """
+  Whether to apply DISTINCT to the aggregate function.
+  """
+  _distinct: Boolean
+  """
+  Negate the result of the provided Having condition.
+  """
+  _not: Beach_Having
+  """
+  Apply multiple Having conditions using `OR` logic.
+  """
+  _or: [Beach_Having!]
+  """
+  ✨ Generated from Field `Beach`.`_count` of type `Int!`
+  """
+  _count: Int_Filter
+  """
+  ✨ Generated from Field `Beach`.`boundaryPolygon_count` of type `Int!`
+  """
+  boundaryPolygon_count: Int_Filter
+  """
+  ✨ Generated from Field `Beach`.`createdAt_count` of type `Int!`
+  """
+  createdAt_count: Int_Filter
+  """
+  ✨ Generated from Field `Beach`.`id_count` of type `Int!`
+  """
+  id_count: Int_Filter
+  """
+  ✨ Generated from Field `Beach`.`images_count` of type `Int!`
+  """
+  images_count: Int_Filter
+  """
+  ✨ Generated from Field `Beach`.`latitude_count` of type `Int!`
+  """
+  latitude_count: Int_Filter
+  """
+  ✨ Generated from Field `Beach`.`longitude_count` of type `Int!`
+  """
+  longitude_count: Int_Filter
+  """
+  ✨ Generated from Field `Beach`.`name_count` of type `Int!`
+  """
+  name_count: Int_Filter
+  """
+  ✨ Generated from Field `Beach`.`state_count` of type `Int!`
+  """
+  state_count: Int_Filter
+  """
+  ✨ Generated from Field `Beach`.`userId_count` of type `Int!`
+  """
+  userId_count: Int_Filter
+  """
+  ✨ Generated from Field `Beach`.`latitude_sum` of type `Float`
+  """
+  latitude_sum: Float_Filter
+  """
+  ✨ Generated from Field `Beach`.`longitude_sum` of type `Float`
+  """
+  longitude_sum: Float_Filter
+  """
+  ✨ Generated from Field `Beach`.`latitude_avg` of type `Float`
+  """
+  latitude_avg: Float_Filter
+  """
+  ✨ Generated from Field `Beach`.`longitude_avg` of type `Float`
+  """
+  longitude_avg: Float_Filter
+  """
+  ✨ Generated from Field `Beach`.`boundaryPolygon_min` of type `Any`
+  """
+  boundaryPolygon_min: Any_Filter
+  """
+  ✨ Generated from Field `Beach`.`createdAt_min` of type `Date`
+  """
+  createdAt_min: Date_Filter
+  """
+  ✨ Generated from Field `Beach`.`images_min` of type `Any`
+  """
+  images_min: Any_Filter
+  """
+  ✨ Generated from Field `Beach`.`latitude_min` of type `Float`
+  """
+  latitude_min: Float_Filter
+  """
+  ✨ Generated from Field `Beach`.`longitude_min` of type `Float`
+  """
+  longitude_min: Float_Filter
+  """
+  ✨ Generated from Field `Beach`.`boundaryPolygon_max` of type `Any`
+  """
+  boundaryPolygon_max: Any_Filter
+  """
+  ✨ Generated from Field `Beach`.`createdAt_max` of type `Date`
+  """
+  createdAt_max: Date_Filter
+  """
+  ✨ Generated from Field `Beach`.`images_max` of type `Any`
+  """
+  images_max: Any_Filter
+  """
+  ✨ Generated from Field `Beach`.`latitude_max` of type `Float`
+  """
+  latitude_max: Float_Filter
+  """
+  ✨ Generated from Field `Beach`.`longitude_max` of type `Float`
+  """
+  longitude_max: Float_Filter
+}
+"""
+✨ Generated key input type for table 'Beach'. It represents the primary key fields used to uniquely identify a row in the table.
+"""
+input Beach_Key {
+  """
+  ✨ Generated from Field `Beach`.`id` of type `UUID!`
+  """
+  id: UUID
+  """
+  ✨ `_expr` server value variant of `id` (✨ Generated from Field `Beach`.`id` of type `UUID!`)
+  """
+  id_expr: UUID_Expr
+}
+"""
+✨ Generated list filter input type for table 'Beach'. This input applies filtering logic based on the count or existence of related objects that matches certain criteria.
+"""
+input Beach_ListFilter {
+  """
+  The desired number of objects that match the condition (defaults to at least one).
+  """
+  count: Int_Filter = {gt:0}
+  """
+  Condition of the related objects to filter for.
+  """
+  exist: Beach_Filter
+}
+"""
+✨ Generated order input type for table 'Beach'. This input defines the sorting order of rows in query results based on one or more fields.
+"""
+input Beach_Order {
+  """
+  ✨ Generated from Field `Beach`.`id` of type `UUID!`
+  """
+  id: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`userId` of type `String`
+  """
+  userId: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`user` of type `User`
+  """
+  user: User_Order
+  """
+  ✨ Generated from Field `Beach`.`boundaryPolygon` of type `Any`
+  """
+  boundaryPolygon: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`createdAt` of type `Date!`
+  """
+  createdAt: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`images` of type `Any`
+  """
+  images: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`latitude` of type `Float!`
+  """
+  latitude: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`longitude` of type `Float!`
+  """
+  longitude: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`name` of type `String!`
+  """
+  name: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`state` of type `String!`
+  """
+  state: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`_count` of type `Int!`
+  """
+  _count: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`boundaryPolygon_count` of type `Int!`
+  """
+  boundaryPolygon_count: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`createdAt_count` of type `Int!`
+  """
+  createdAt_count: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`id_count` of type `Int!`
+  """
+  id_count: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`images_count` of type `Int!`
+  """
+  images_count: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`latitude_count` of type `Int!`
+  """
+  latitude_count: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`longitude_count` of type `Int!`
+  """
+  longitude_count: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`name_count` of type `Int!`
+  """
+  name_count: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`state_count` of type `Int!`
+  """
+  state_count: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`userId_count` of type `Int!`
+  """
+  userId_count: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`latitude_sum` of type `Float`
+  """
+  latitude_sum: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`longitude_sum` of type `Float`
+  """
+  longitude_sum: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`latitude_avg` of type `Float`
+  """
+  latitude_avg: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`longitude_avg` of type `Float`
+  """
+  longitude_avg: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`boundaryPolygon_min` of type `Any`
+  """
+  boundaryPolygon_min: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`createdAt_min` of type `Date`
+  """
+  createdAt_min: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`images_min` of type `Any`
+  """
+  images_min: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`latitude_min` of type `Float`
+  """
+  latitude_min: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`longitude_min` of type `Float`
+  """
+  longitude_min: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`boundaryPolygon_max` of type `Any`
+  """
+  boundaryPolygon_max: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`createdAt_max` of type `Date`
+  """
+  createdAt_max: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`images_max` of type `Any`
+  """
+  images_max: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`latitude_max` of type `Float`
+  """
+  latitude_max: OrderDirection
+  """
+  ✨ Generated from Field `Beach`.`longitude_max` of type `Float`
+  """
+  longitude_max: OrderDirection
+}
+"""
+✨ Generated data input type for table 'Comment'. It includes all necessary fields for creating or upserting rows into table.
+"""
+input Comment_Data {
+  """
+  ✨ Generated from Field `Comment`.`id` of type `UUID!`
+  """
+  id: UUID
+  """
+  ✨ `_expr` server value variant of `id` (✨ Generated from Field `Comment`.`id` of type `UUID!`)
+  """
+  id_expr: UUID_Expr
+  """
+  ✨ Generated from Field `Comment`.`beachId` of type `UUID!`
+  """
+  beachId: UUID
+  """
+  ✨ `_expr` server value variant of `beachId` (✨ Generated from Field `Comment`.`beachId` of type `UUID!`)
+  """
+  beachId_expr: UUID_Expr
+  """
+  ✨ Generated from Field `Comment`.`userId` of type `String!`
+  """
+  userId: String
+  """
+  ✨ `_expr` server value variant of `userId` (✨ Generated from Field `Comment`.`userId` of type `String!`)
+  """
+  userId_expr: String_Expr
+  """
+  ✨ Generated from Field `Comment`.`beach` of type `Beach!`
+  """
+  beach: Beach_Key
+  """
+  ✨ Generated from Field `Comment`.`user` of type `User!`
+  """
+  user: User_Key
+  """
+  ✨ Generated from Field `Comment`.`createdAt` of type `Date!`
+  """
+  createdAt: Date
+  """
+  ✨ `_date` server value variant of `createdAt` (✨ Generated from Field `Comment`.`createdAt` of type `Date!`)
+  """
+  createdAt_date: Date_Relative
+  """
+  ✨ `_expr` server value variant of `createdAt` (✨ Generated from Field `Comment`.`createdAt` of type `Date!`)
+  """
+  createdAt_expr: Date_Expr
+  """
+  ✨ `_update` server value variant of `createdAt` (✨ Generated from Field `Comment`.`createdAt` of type `Date!`)
+  """
+  createdAt_update: [Date_Update!]
+  """
+  ✨ Generated from Field `Comment`.`text` of type `String!`
+  """
+  text: String
+  """
+  ✨ `_expr` server value variant of `text` (✨ Generated from Field `Comment`.`text` of type `String!`)
+  """
+  text_expr: String_Expr
+}
+"""
+✨ Generated filter input type for table 'Comment'. This input allows filtering objects using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input Comment_Filter {
+  """
+  Apply multiple filter conditions using `AND` logic.
+  """
+  _and: [Comment_Filter!]
+  """
+  Negate the result of the provided filter condition.
+  """
+  _not: Comment_Filter
+  """
+  Apply multiple filter conditions using `OR` logic.
+  """
+  _or: [Comment_Filter!]
+  """
+  ✨ Generated from Field `Comment`.`id` of type `UUID!`
+  """
+  id: UUID_Filter
+  """
+  ✨ Generated from Field `Comment`.`beachId` of type `UUID!`
+  """
+  beachId: UUID_Filter
+  """
+  ✨ Generated from Field `Comment`.`userId` of type `String!`
+  """
+  userId: String_Filter
+  """
+  ✨ Generated from Field `Comment`.`beach` of type `Beach!`
+  """
+  beach: Beach_Filter
+  """
+  ✨ Generated from Field `Comment`.`user` of type `User!`
+  """
+  user: User_Filter
+  """
+  ✨ Generated from Field `Comment`.`createdAt` of type `Date!`
+  """
+  createdAt: Date_Filter
+  """
+  ✨ Generated from Field `Comment`.`text` of type `String!`
+  """
+  text: String_Filter
+}
+"""
+✨ Generated first-row input type for table 'Comment'. This input selects the first row matching the filter criteria, ordered according to the specified conditions.
+"""
+input Comment_FirstRow {
+  """
+  Order the result by the specified fields.
+  """
+  orderBy: [Comment_Order!]
+  """
+  Filters rows based on the specified conditions.
+  """
+  where: Comment_Filter
+}
+"""
+✨ Generated having input type for table 'Comment'. This input allows you to filter groups during aggregate queries using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input Comment_Having {
+  """
+  Apply multiple Having conditions using `AND` logic.
+  """
+  _and: [Comment_Having!]
+  """
+  Whether to apply DISTINCT to the aggregate function.
+  """
+  _distinct: Boolean
+  """
+  Negate the result of the provided Having condition.
+  """
+  _not: Comment_Having
+  """
+  Apply multiple Having conditions using `OR` logic.
+  """
+  _or: [Comment_Having!]
+  """
+  ✨ Generated from Field `Comment`.`_count` of type `Int!`
+  """
+  _count: Int_Filter
+  """
+  ✨ Generated from Field `Comment`.`beachId_count` of type `Int!`
+  """
+  beachId_count: Int_Filter
+  """
+  ✨ Generated from Field `Comment`.`createdAt_count` of type `Int!`
+  """
+  createdAt_count: Int_Filter
+  """
+  ✨ Generated from Field `Comment`.`id_count` of type `Int!`
+  """
+  id_count: Int_Filter
+  """
+  ✨ Generated from Field `Comment`.`text_count` of type `Int!`
+  """
+  text_count: Int_Filter
+  """
+  ✨ Generated from Field `Comment`.`userId_count` of type `Int!`
+  """
+  userId_count: Int_Filter
+  """
+  ✨ Generated from Field `Comment`.`createdAt_min` of type `Date`
+  """
+  createdAt_min: Date_Filter
+  """
+  ✨ Generated from Field `Comment`.`createdAt_max` of type `Date`
+  """
+  createdAt_max: Date_Filter
+}
+"""
+✨ Generated key input type for table 'Comment'. It represents the primary key fields used to uniquely identify a row in the table.
+"""
+input Comment_Key {
+  """
+  ✨ Generated from Field `Comment`.`id` of type `UUID!`
+  """
+  id: UUID
+  """
+  ✨ `_expr` server value variant of `id` (✨ Generated from Field `Comment`.`id` of type `UUID!`)
+  """
+  id_expr: UUID_Expr
+}
+"""
+✨ Generated list filter input type for table 'Comment'. This input applies filtering logic based on the count or existence of related objects that matches certain criteria.
+"""
+input Comment_ListFilter {
+  """
+  The desired number of objects that match the condition (defaults to at least one).
+  """
+  count: Int_Filter = {gt:0}
+  """
+  Condition of the related objects to filter for.
+  """
+  exist: Comment_Filter
+}
+"""
+✨ Generated order input type for table 'Comment'. This input defines the sorting order of rows in query results based on one or more fields.
+"""
+input Comment_Order {
+  """
+  ✨ Generated from Field `Comment`.`id` of type `UUID!`
+  """
+  id: OrderDirection
+  """
+  ✨ Generated from Field `Comment`.`beachId` of type `UUID!`
+  """
+  beachId: OrderDirection
+  """
+  ✨ Generated from Field `Comment`.`userId` of type `String!`
+  """
+  userId: OrderDirection
+  """
+  ✨ Generated from Field `Comment`.`beach` of type `Beach!`
+  """
+  beach: Beach_Order
+  """
+  ✨ Generated from Field `Comment`.`user` of type `User!`
+  """
+  user: User_Order
+  """
+  ✨ Generated from Field `Comment`.`createdAt` of type `Date!`
+  """
+  createdAt: OrderDirection
+  """
+  ✨ Generated from Field `Comment`.`text` of type `String!`
+  """
+  text: OrderDirection
+  """
+  ✨ Generated from Field `Comment`.`_count` of type `Int!`
+  """
+  _count: OrderDirection
+  """
+  ✨ Generated from Field `Comment`.`beachId_count` of type `Int!`
+  """
+  beachId_count: OrderDirection
+  """
+  ✨ Generated from Field `Comment`.`createdAt_count` of type `Int!`
+  """
+  createdAt_count: OrderDirection
+  """
+  ✨ Generated from Field `Comment`.`id_count` of type `Int!`
+  """
+  id_count: OrderDirection
+  """
+  ✨ Generated from Field `Comment`.`text_count` of type `Int!`
+  """
+  text_count: OrderDirection
+  """
+  ✨ Generated from Field `Comment`.`userId_count` of type `Int!`
+  """
+  userId_count: OrderDirection
+  """
+  ✨ Generated from Field `Comment`.`createdAt_min` of type `Date`
+  """
+  createdAt_min: OrderDirection
+  """
+  ✨ Generated from Field `Comment`.`createdAt_max` of type `Date`
+  """
+  createdAt_max: OrderDirection
+}
+"""
+✨ Generated data input type for table 'Report'. It includes all necessary fields for creating or upserting rows into table.
+"""
+input Report_Data {
+  """
+  ✨ Generated from Field `Report`.`id` of type `UUID!`
+  """
+  id: UUID
+  """
+  ✨ `_expr` server value variant of `id` (✨ Generated from Field `Report`.`id` of type `UUID!`)
+  """
+  id_expr: UUID_Expr
+  """
+  ✨ Generated from Field `Report`.`accessId` of type `UUID!`
+  """
+  accessId: UUID
+  """
+  ✨ `_expr` server value variant of `accessId` (✨ Generated from Field `Report`.`accessId` of type `UUID!`)
+  """
+  accessId_expr: UUID_Expr
+  """
+  ✨ Generated from Field `Report`.`userId` of type `String`
+  """
+  userId: String
+  """
+  ✨ `_expr` server value variant of `userId` (✨ Generated from Field `Report`.`userId` of type `String`)
+  """
+  userId_expr: String_Expr
+  """
+  ✨ Generated from Field `Report`.`access` of type `Access!`
+  """
+  access: Access_Key
+  """
+  ✨ Generated from Field `Report`.`user` of type `User`
+  """
+  user: User_Key
+  """
+  ✨ Generated from Field `Report`.`blockerName` of type `String!`
+  """
+  blockerName: String
+  """
+  ✨ `_expr` server value variant of `blockerName` (✨ Generated from Field `Report`.`blockerName` of type `String!`)
+  """
+  blockerName_expr: String_Expr
+  """
+  ✨ Generated from Field `Report`.`blockerType` of type `String!`
+  """
+  blockerType: String
+  """
+  ✨ `_expr` server value variant of `blockerType` (✨ Generated from Field `Report`.`blockerType` of type `String!`)
+  """
+  blockerType_expr: String_Expr
+  """
+  ✨ Generated from Field `Report`.`createdAt` of type `Date!`
+  """
+  createdAt: Date
+  """
+  ✨ `_date` server value variant of `createdAt` (✨ Generated from Field `Report`.`createdAt` of type `Date!`)
+  """
+  createdAt_date: Date_Relative
+  """
+  ✨ `_expr` server value variant of `createdAt` (✨ Generated from Field `Report`.`createdAt` of type `Date!`)
+  """
+  createdAt_expr: Date_Expr
+  """
+  ✨ `_update` server value variant of `createdAt` (✨ Generated from Field `Report`.`createdAt` of type `Date!`)
+  """
+  createdAt_update: [Date_Update!]
+  """
+  ✨ Generated from Field `Report`.`description` of type `String!`
+  """
+  description: String
+  """
+  ✨ `_expr` server value variant of `description` (✨ Generated from Field `Report`.`description` of type `String!`)
+  """
+  description_expr: String_Expr
+  """
+  ✨ Generated from Field `Report`.`feeAmount` of type `Float`
+  """
+  feeAmount: Float
+  """
+  ✨ `_expr` server value variant of `feeAmount` (✨ Generated from Field `Report`.`feeAmount` of type `Float`)
+  """
+  feeAmount_expr: Float_Expr
+  """
+  ✨ `_update` server value variant of `feeAmount` (✨ Generated from Field `Report`.`feeAmount` of type `Float`)
+  """
+  feeAmount_update: [Float_Update!]
+  """
+  ✨ Generated from Field `Report`.`hasIllegalFee` of type `Boolean!`
+  """
+  hasIllegalFee: Boolean
+  """
+  ✨ `_expr` server value variant of `hasIllegalFee` (✨ Generated from Field `Report`.`hasIllegalFee` of type `Boolean!`)
+  """
+  hasIllegalFee_expr: Boolean_Expr
+  """
+  ✨ Generated from Field `Report`.`reporterName` of type `String!`
+  """
+  reporterName: String
+  """
+  ✨ `_expr` server value variant of `reporterName` (✨ Generated from Field `Report`.`reporterName` of type `String!`)
+  """
+  reporterName_expr: String_Expr
+  """
+  ✨ Generated from Field `Report`.`score` of type `Int!`
+  """
+  score: Int
+  """
+  ✨ `_expr` server value variant of `score` (✨ Generated from Field `Report`.`score` of type `Int!`)
+  """
+  score_expr: Int_Expr
+  """
+  ✨ `_update` server value variant of `score` (✨ Generated from Field `Report`.`score` of type `Int!`)
+  """
+  score_update: [Int_Update!]
+}
+"""
+✨ Generated filter input type for table 'Report'. This input allows filtering objects using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input Report_Filter {
+  """
+  Apply multiple filter conditions using `AND` logic.
+  """
+  _and: [Report_Filter!]
+  """
+  Negate the result of the provided filter condition.
+  """
+  _not: Report_Filter
+  """
+  Apply multiple filter conditions using `OR` logic.
+  """
+  _or: [Report_Filter!]
+  """
+  ✨ Generated from Field `Report`.`id` of type `UUID!`
+  """
+  id: UUID_Filter
+  """
+  ✨ Generated from Field `Report`.`accessId` of type `UUID!`
+  """
+  accessId: UUID_Filter
+  """
+  ✨ Generated from Field `Report`.`userId` of type `String`
+  """
+  userId: String_Filter
+  """
+  ✨ Generated from Field `Report`.`access` of type `Access!`
+  """
+  access: Access_Filter
+  """
+  ✨ Generated from Field `Report`.`user` of type `User`
+  """
+  user: User_Filter
+  """
+  ✨ Generated from Field `Report`.`blockerName` of type `String!`
+  """
+  blockerName: String_Filter
+  """
+  ✨ Generated from Field `Report`.`blockerType` of type `String!`
+  """
+  blockerType: String_Filter
+  """
+  ✨ Generated from Field `Report`.`createdAt` of type `Date!`
+  """
+  createdAt: Date_Filter
+  """
+  ✨ Generated from Field `Report`.`description` of type `String!`
+  """
+  description: String_Filter
+  """
+  ✨ Generated from Field `Report`.`feeAmount` of type `Float`
+  """
+  feeAmount: Float_Filter
+  """
+  ✨ Generated from Field `Report`.`hasIllegalFee` of type `Boolean!`
+  """
+  hasIllegalFee: Boolean_Filter
+  """
+  ✨ Generated from Field `Report`.`reporterName` of type `String!`
+  """
+  reporterName: String_Filter
+  """
+  ✨ Generated from Field `Report`.`score` of type `Int!`
+  """
+  score: Int_Filter
+}
+"""
+✨ Generated first-row input type for table 'Report'. This input selects the first row matching the filter criteria, ordered according to the specified conditions.
+"""
+input Report_FirstRow {
+  """
+  Order the result by the specified fields.
+  """
+  orderBy: [Report_Order!]
+  """
+  Filters rows based on the specified conditions.
+  """
+  where: Report_Filter
+}
+"""
+✨ Generated having input type for table 'Report'. This input allows you to filter groups during aggregate queries using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input Report_Having {
+  """
+  Apply multiple Having conditions using `AND` logic.
+  """
+  _and: [Report_Having!]
+  """
+  Whether to apply DISTINCT to the aggregate function.
+  """
+  _distinct: Boolean
+  """
+  Negate the result of the provided Having condition.
+  """
+  _not: Report_Having
+  """
+  Apply multiple Having conditions using `OR` logic.
+  """
+  _or: [Report_Having!]
+  """
+  ✨ Generated from Field `Report`.`_count` of type `Int!`
+  """
+  _count: Int_Filter
+  """
+  ✨ Generated from Field `Report`.`accessId_count` of type `Int!`
+  """
+  accessId_count: Int_Filter
+  """
+  ✨ Generated from Field `Report`.`blockerName_count` of type `Int!`
+  """
+  blockerName_count: Int_Filter
+  """
+  ✨ Generated from Field `Report`.`blockerType_count` of type `Int!`
+  """
+  blockerType_count: Int_Filter
+  """
+  ✨ Generated from Field `Report`.`createdAt_count` of type `Int!`
+  """
+  createdAt_count: Int_Filter
+  """
+  ✨ Generated from Field `Report`.`description_count` of type `Int!`
+  """
+  description_count: Int_Filter
+  """
+  ✨ Generated from Field `Report`.`feeAmount_count` of type `Int!`
+  """
+  feeAmount_count: Int_Filter
+  """
+  ✨ Generated from Field `Report`.`hasIllegalFee_count` of type `Int!`
+  """
+  hasIllegalFee_count: Int_Filter
+  """
+  ✨ Generated from Field `Report`.`id_count` of type `Int!`
+  """
+  id_count: Int_Filter
+  """
+  ✨ Generated from Field `Report`.`reporterName_count` of type `Int!`
+  """
+  reporterName_count: Int_Filter
+  """
+  ✨ Generated from Field `Report`.`score_count` of type `Int!`
+  """
+  score_count: Int_Filter
+  """
+  ✨ Generated from Field `Report`.`userId_count` of type `Int!`
+  """
+  userId_count: Int_Filter
+  """
+  ✨ Generated from Field `Report`.`feeAmount_sum` of type `Float`
+  """
+  feeAmount_sum: Float_Filter
+  """
+  ✨ Generated from Field `Report`.`score_sum` of type `Int`
+  """
+  score_sum: Int_Filter
+  """
+  ✨ Generated from Field `Report`.`feeAmount_avg` of type `Float`
+  """
+  feeAmount_avg: Float_Filter
+  """
+  ✨ Generated from Field `Report`.`score_avg` of type `Float`
+  """
+  score_avg: Float_Filter
+  """
+  ✨ Generated from Field `Report`.`createdAt_min` of type `Date`
+  """
+  createdAt_min: Date_Filter
+  """
+  ✨ Generated from Field `Report`.`feeAmount_min` of type `Float`
+  """
+  feeAmount_min: Float_Filter
+  """
+  ✨ Generated from Field `Report`.`score_min` of type `Int`
+  """
+  score_min: Int_Filter
+  """
+  ✨ Generated from Field `Report`.`createdAt_max` of type `Date`
+  """
+  createdAt_max: Date_Filter
+  """
+  ✨ Generated from Field `Report`.`feeAmount_max` of type `Float`
+  """
+  feeAmount_max: Float_Filter
+  """
+  ✨ Generated from Field `Report`.`score_max` of type `Int`
+  """
+  score_max: Int_Filter
+}
+"""
+✨ Generated key input type for table 'Report'. It represents the primary key fields used to uniquely identify a row in the table.
+"""
+input Report_Key {
+  """
+  ✨ Generated from Field `Report`.`id` of type `UUID!`
+  """
+  id: UUID
+  """
+  ✨ `_expr` server value variant of `id` (✨ Generated from Field `Report`.`id` of type `UUID!`)
+  """
+  id_expr: UUID_Expr
+}
+"""
+✨ Generated list filter input type for table 'Report'. This input applies filtering logic based on the count or existence of related objects that matches certain criteria.
+"""
+input Report_ListFilter {
+  """
+  The desired number of objects that match the condition (defaults to at least one).
+  """
+  count: Int_Filter = {gt:0}
+  """
+  Condition of the related objects to filter for.
+  """
+  exist: Report_Filter
+}
+"""
+✨ Generated order input type for table 'Report'. This input defines the sorting order of rows in query results based on one or more fields.
+"""
+input Report_Order {
+  """
+  ✨ Generated from Field `Report`.`id` of type `UUID!`
+  """
+  id: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`accessId` of type `UUID!`
+  """
+  accessId: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`userId` of type `String`
+  """
+  userId: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`access` of type `Access!`
+  """
+  access: Access_Order
+  """
+  ✨ Generated from Field `Report`.`user` of type `User`
+  """
+  user: User_Order
+  """
+  ✨ Generated from Field `Report`.`blockerName` of type `String!`
+  """
+  blockerName: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`blockerType` of type `String!`
+  """
+  blockerType: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`createdAt` of type `Date!`
+  """
+  createdAt: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`description` of type `String!`
+  """
+  description: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`feeAmount` of type `Float`
+  """
+  feeAmount: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`hasIllegalFee` of type `Boolean!`
+  """
+  hasIllegalFee: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`reporterName` of type `String!`
+  """
+  reporterName: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`score` of type `Int!`
+  """
+  score: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`_count` of type `Int!`
+  """
+  _count: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`accessId_count` of type `Int!`
+  """
+  accessId_count: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`blockerName_count` of type `Int!`
+  """
+  blockerName_count: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`blockerType_count` of type `Int!`
+  """
+  blockerType_count: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`createdAt_count` of type `Int!`
+  """
+  createdAt_count: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`description_count` of type `Int!`
+  """
+  description_count: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`feeAmount_count` of type `Int!`
+  """
+  feeAmount_count: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`hasIllegalFee_count` of type `Int!`
+  """
+  hasIllegalFee_count: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`id_count` of type `Int!`
+  """
+  id_count: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`reporterName_count` of type `Int!`
+  """
+  reporterName_count: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`score_count` of type `Int!`
+  """
+  score_count: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`userId_count` of type `Int!`
+  """
+  userId_count: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`feeAmount_sum` of type `Float`
+  """
+  feeAmount_sum: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`score_sum` of type `Int`
+  """
+  score_sum: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`feeAmount_avg` of type `Float`
+  """
+  feeAmount_avg: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`score_avg` of type `Float`
+  """
+  score_avg: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`createdAt_min` of type `Date`
+  """
+  createdAt_min: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`feeAmount_min` of type `Float`
+  """
+  feeAmount_min: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`score_min` of type `Int`
+  """
+  score_min: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`createdAt_max` of type `Date`
+  """
+  createdAt_max: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`feeAmount_max` of type `Float`
+  """
+  feeAmount_max: OrderDirection
+  """
+  ✨ Generated from Field `Report`.`score_max` of type `Int`
+  """
+  score_max: OrderDirection
+}
+"""
+✨ Generated data input type for table 'User'. It includes all necessary fields for creating or upserting rows into table.
+"""
+input User_Data {
+  """
+  ✨ Generated from Field `User`.`id` of type `String!`
+  """
+  id: String
+  """
+  ✨ `_expr` server value variant of `id` (✨ Generated from Field `User`.`id` of type `String!`)
+  """
+  id_expr: String_Expr
+  """
+  ✨ Generated from Field `User`.`avatarUrl` of type `String`
+  """
+  avatarUrl: String
+  """
+  ✨ `_expr` server value variant of `avatarUrl` (✨ Generated from Field `User`.`avatarUrl` of type `String`)
+  """
+  avatarUrl_expr: String_Expr
+  """
+  ✨ Generated from Field `User`.`createdAt` of type `Date!`
+  """
+  createdAt: Date
+  """
+  ✨ `_date` server value variant of `createdAt` (✨ Generated from Field `User`.`createdAt` of type `Date!`)
+  """
+  createdAt_date: Date_Relative
+  """
+  ✨ `_expr` server value variant of `createdAt` (✨ Generated from Field `User`.`createdAt` of type `Date!`)
+  """
+  createdAt_expr: Date_Expr
+  """
+  ✨ `_update` server value variant of `createdAt` (✨ Generated from Field `User`.`createdAt` of type `Date!`)
+  """
+  createdAt_update: [Date_Update!]
+  """
+  ✨ Generated from Field `User`.`reputation` of type `Int!`
+  """
+  reputation: Int
+  """
+  ✨ `_expr` server value variant of `reputation` (✨ Generated from Field `User`.`reputation` of type `Int!`)
+  """
+  reputation_expr: Int_Expr
+  """
+  ✨ `_update` server value variant of `reputation` (✨ Generated from Field `User`.`reputation` of type `Int!`)
+  """
+  reputation_update: [Int_Update!]
+  """
+  ✨ Generated from Field `User`.`username` of type `String!`
+  """
+  username: String
+  """
+  ✨ `_expr` server value variant of `username` (✨ Generated from Field `User`.`username` of type `String!`)
+  """
+  username_expr: String_Expr
+}
+"""
+✨ Generated filter input type for table 'User'. This input allows filtering objects using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input User_Filter {
+  """
+  Apply multiple filter conditions using `AND` logic.
+  """
+  _and: [User_Filter!]
+  """
+  Negate the result of the provided filter condition.
+  """
+  _not: User_Filter
+  """
+  Apply multiple filter conditions using `OR` logic.
+  """
+  _or: [User_Filter!]
+  """
+  ✨ Generated from Field `User`.`id` of type `String!`
+  """
+  id: String_Filter
+  """
+  ✨ Generated from Field `User`.`avatarUrl` of type `String`
+  """
+  avatarUrl: String_Filter
+  """
+  ✨ Generated from Field `User`.`createdAt` of type `Date!`
+  """
+  createdAt: Date_Filter
+  """
+  ✨ Generated from Field `User`.`reputation` of type `Int!`
+  """
+  reputation: Int_Filter
+  """
+  ✨ Generated from Field `User`.`username` of type `String!`
+  """
+  username: String_Filter
+  """
+  ✨ Generated from Field `User`.`accesses_on_user` of type `[Access!]!`
+  """
+  accesses_on_user: Access_ListFilter
+  """
+  ✨ Generated from Field `User`.`beaches_on_user` of type `[Beach!]!`
+  """
+  beaches_on_user: Beach_ListFilter
+  """
+  ✨ Generated from Field `User`.`comments_on_user` of type `[Comment!]!`
+  """
+  comments_on_user: Comment_ListFilter
+  """
+  ✨ Generated from Field `User`.`reports_on_user` of type `[Report!]!`
+  """
+  reports_on_user: Report_ListFilter
+}
+"""
+✨ Generated first-row input type for table 'User'. This input selects the first row matching the filter criteria, ordered according to the specified conditions.
+"""
+input User_FirstRow {
+  """
+  Order the result by the specified fields.
+  """
+  orderBy: [User_Order!]
+  """
+  Filters rows based on the specified conditions.
+  """
+  where: User_Filter
+}
+"""
+✨ Generated having input type for table 'User'. This input allows you to filter groups during aggregate queries using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input User_Having {
+  """
+  Apply multiple Having conditions using `AND` logic.
+  """
+  _and: [User_Having!]
+  """
+  Whether to apply DISTINCT to the aggregate function.
+  """
+  _distinct: Boolean
+  """
+  Negate the result of the provided Having condition.
+  """
+  _not: User_Having
+  """
+  Apply multiple Having conditions using `OR` logic.
+  """
+  _or: [User_Having!]
+  """
+  ✨ Generated from Field `User`.`_count` of type `Int!`
+  """
+  _count: Int_Filter
+  """
+  ✨ Generated from Field `User`.`avatarUrl_count` of type `Int!`
+  """
+  avatarUrl_count: Int_Filter
+  """
+  ✨ Generated from Field `User`.`createdAt_count` of type `Int!`
+  """
+  createdAt_count: Int_Filter
+  """
+  ✨ Generated from Field `User`.`id_count` of type `Int!`
+  """
+  id_count: Int_Filter
+  """
+  ✨ Generated from Field `User`.`reputation_count` of type `Int!`
+  """
+  reputation_count: Int_Filter
+  """
+  ✨ Generated from Field `User`.`username_count` of type `Int!`
+  """
+  username_count: Int_Filter
+  """
+  ✨ Generated from Field `User`.`reputation_sum` of type `Int`
+  """
+  reputation_sum: Int_Filter
+  """
+  ✨ Generated from Field `User`.`reputation_avg` of type `Float`
+  """
+  reputation_avg: Float_Filter
+  """
+  ✨ Generated from Field `User`.`createdAt_min` of type `Date`
+  """
+  createdAt_min: Date_Filter
+  """
+  ✨ Generated from Field `User`.`reputation_min` of type `Int`
+  """
+  reputation_min: Int_Filter
+  """
+  ✨ Generated from Field `User`.`createdAt_max` of type `Date`
+  """
+  createdAt_max: Date_Filter
+  """
+  ✨ Generated from Field `User`.`reputation_max` of type `Int`
+  """
+  reputation_max: Int_Filter
+}
+"""
+✨ Generated key input type for table 'User'. It represents the primary key fields used to uniquely identify a row in the table.
+"""
+input User_Key {
+  """
+  ✨ Generated from Field `User`.`id` of type `String!`
+  """
+  id: String
+  """
+  ✨ `_expr` server value variant of `id` (✨ Generated from Field `User`.`id` of type `String!`)
+  """
+  id_expr: String_Expr
+}
+"""
+✨ Generated list filter input type for table 'User'. This input applies filtering logic based on the count or existence of related objects that matches certain criteria.
+"""
+input User_ListFilter {
+  """
+  The desired number of objects that match the condition (defaults to at least one).
+  """
+  count: Int_Filter = {gt:0}
+  """
+  Condition of the related objects to filter for.
+  """
+  exist: User_Filter
+}
+"""
+✨ Generated order input type for table 'User'. This input defines the sorting order of rows in query results based on one or more fields.
+"""
+input User_Order {
+  """
+  ✨ Generated from Field `User`.`id` of type `String!`
+  """
+  id: OrderDirection
+  """
+  ✨ Generated from Field `User`.`avatarUrl` of type `String`
+  """
+  avatarUrl: OrderDirection
+  """
+  ✨ Generated from Field `User`.`createdAt` of type `Date!`
+  """
+  createdAt: OrderDirection
+  """
+  ✨ Generated from Field `User`.`reputation` of type `Int!`
+  """
+  reputation: OrderDirection
+  """
+  ✨ Generated from Field `User`.`username` of type `String!`
+  """
+  username: OrderDirection
+  """
+  ✨ Generated from Field `User`.`_count` of type `Int!`
+  """
+  _count: OrderDirection
+  """
+  ✨ Generated from Field `User`.`avatarUrl_count` of type `Int!`
+  """
+  avatarUrl_count: OrderDirection
+  """
+  ✨ Generated from Field `User`.`createdAt_count` of type `Int!`
+  """
+  createdAt_count: OrderDirection
+  """
+  ✨ Generated from Field `User`.`id_count` of type `Int!`
+  """
+  id_count: OrderDirection
+  """
+  ✨ Generated from Field `User`.`reputation_count` of type `Int!`
+  """
+  reputation_count: OrderDirection
+  """
+  ✨ Generated from Field `User`.`username_count` of type `Int!`
+  """
+  username_count: OrderDirection
+  """
+  ✨ Generated from Field `User`.`reputation_sum` of type `Int`
+  """
+  reputation_sum: OrderDirection
+  """
+  ✨ Generated from Field `User`.`reputation_avg` of type `Float`
+  """
+  reputation_avg: OrderDirection
+  """
+  ✨ Generated from Field `User`.`createdAt_min` of type `Date`
+  """
+  createdAt_min: OrderDirection
+  """
+  ✨ Generated from Field `User`.`reputation_min` of type `Int`
+  """
+  reputation_min: OrderDirection
+  """
+  ✨ Generated from Field `User`.`createdAt_max` of type `Date`
+  """
+  createdAt_max: OrderDirection
+  """
+  ✨ Generated from Field `User`.`reputation_max` of type `Int`
+  """
+  reputation_max: OrderDirection
+}

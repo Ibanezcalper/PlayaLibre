@@ -1,0 +1,198 @@
+# Mutations for PlayaLibre (PostgreSQL)
+
+# Create a new beach
+mutation CreateBeach(
+  $name: String!
+  $state: String!
+  $latitude: Float!
+  $longitude: Float!
+  $boundaryPolygon: Any
+  $images: Any
+  $userId: String
+) @auth(level: PUBLIC) {
+  beach_insert(data: {
+    name: $name
+    state: $state
+    latitude: $latitude
+    longitude: $longitude
+    boundaryPolygon: $boundaryPolygon
+    images: $images
+    userId: $userId
+  })
+}
+
+# Create a new beach access point
+mutation CreateAccess(
+  $beachId: UUID!
+  $name: String!
+  $latitude: Float!
+  $longitude: Float!
+  $trailGeometry: Any
+  $images: Any
+  $pets: Boolean!
+  $shade: Boolean!
+  $showers: Boolean!
+  $parking: Boolean!
+  $security: Boolean!
+  $ramps: Boolean!
+  $wheelchair: Boolean!
+  $parkingReserved: Boolean!
+  $alcoholAllowed: Boolean!
+  $campingAllowed: Boolean!
+  $feeRequired: Boolean!
+  $wifi: Boolean!
+  $cellular4G: Boolean!
+  $blockerType: String!
+  $blockerName: String
+  $blockerDescription: String
+  $illegalFeeAmount: Float!
+  $userId: String
+) @auth(level: PUBLIC) {
+  access_insert(data: {
+    beachId: $beachId
+    name: $name
+    latitude: $latitude
+    longitude: $longitude
+    trailGeometry: $trailGeometry
+    images: $images
+    pets: $pets
+    shade: $shade
+    showers: $showers
+    parking: $parking
+    security: $security
+    ramps: $ramps
+    wheelchair: $wheelchair
+    parkingReserved: $parkingReserved
+    alcoholAllowed: $alcoholAllowed
+    campingAllowed: $campingAllowed
+    feeRequired: $feeRequired
+    wifi: $wifi
+    cellular4G: $cellular4G
+    blockerType: $blockerType
+    blockerName: $blockerName
+    blockerDescription: $blockerDescription
+    illegalFeeAmount: $illegalFeeAmount
+    reputation: 90
+    isPendingCuration: true
+    userId: $userId
+  })
+}
+
+# Create a new report on an access point
+mutation CreateReport(
+  $accessId: UUID!
+  $reporterName: String!
+  $blockerType: String!
+  $blockerName: String!
+  $description: String!
+  $hasIllegalFee: Boolean!
+  $feeAmount: Float
+  $userId: String
+) @auth(level: PUBLIC) {
+  report_insert(data: {
+    accessId: $accessId
+    reporterName: $reporterName
+    blockerType: $blockerType
+    blockerName: $blockerName
+    description: $description
+    hasIllegalFee: $hasIllegalFee
+    feeAmount: $feeAmount
+    score: 1
+    userId: $userId
+  })
+}
+
+# Update an access status, reputation and curation flag
+mutation UpdateAccessCuration(
+  $id: UUID!
+  $blockerType: String!
+  $blockerName: String
+  $blockerDescription: String
+  $illegalFeeAmount: Float!
+  $reputation: Int!
+  $isPendingCuration: Boolean!
+) @auth(level: PUBLIC) {
+  access_update(
+    id: $id,
+    data: {
+      blockerType: $blockerType
+      blockerName: $blockerName
+      blockerDescription: $blockerDescription
+      illegalFeeAmount: $illegalFeeAmount
+      reputation: $reputation
+      isPendingCuration: $isPendingCuration
+    }
+  )
+}
+
+# Update a report's score
+mutation UpdateReportScore(
+  $id: UUID!
+  $score: Int!
+) @auth(level: PUBLIC) {
+  report_update(
+    id: $id,
+    data: {
+      score: $score
+    }
+  )
+}
+
+# Delete a report
+mutation DeleteReport(
+  $id: UUID!
+) @auth(level: PUBLIC) {
+  report_delete(
+    id: $id
+  )
+}
+
+# Save or update a user profile
+mutation UpsertUser(
+  $id: String!
+  $username: String!
+  $avatarUrl: String
+  $reputation: Int!
+) @auth(level: PUBLIC) {
+  user_upsert(data: {
+    id: $id
+    username: $username
+    avatarUrl: $avatarUrl
+    reputation: $reputation
+  })
+}
+
+# Update user reputation score
+mutation UpdateUserReputation(
+  $id: String!
+  $reputation: Int!
+) @auth(level: PUBLIC) {
+  user_update(
+    id: $id
+    data: {
+      reputation: $reputation
+    }
+  )
+}
+
+# Post a comment to a beach
+mutation CreateComment(
+  $beachId: UUID!
+  $userId: String!
+  $text: String!
+) @auth(level: PUBLIC) {
+  comment_insert(data: {
+    beachId: $beachId
+    userId: $userId
+    text: $text
+  })
+}
+
+# Delete a comment
+mutation DeleteComment(
+  $id: UUID!
+) @auth(level: PUBLIC) {
+  comment_delete(
+    id: $id
+  )
+}
