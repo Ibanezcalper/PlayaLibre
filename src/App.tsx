@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import {
   AlertTriangle,
@@ -65,6 +65,7 @@ import { mapDbBeachToFrontend } from './utils/mappers';
 import { UserAvatar } from './components/common/UserAvatar';
 import { MapEvents } from './components/map/MapEvents';
 import { ChangeMapView } from './components/map/ChangeMapView';
+import { MapResizer } from './components/map/MapResizer';
 import { SidebarPanel } from './components/panels/SidebarPanel';
 
 // Modals
@@ -150,6 +151,13 @@ export default function App() {
 
   // App core state
   const [beaches, setBeaches] = useState<Beach[]>(INITIAL_BEACHES);
+
+  // Beaches reference for offline sync without effect re-triggers
+  const beachesRef = useRef<Beach[]>(beaches);
+  useEffect(() => {
+    beachesRef.current = beaches;
+  }, [beaches]);
+
   const [selectedBeachId, setSelectedBeachId] = useState<string | null>(null);
   const [selectedAccessId, setSelectedAccessId] = useState<string | null>(null);
 
@@ -990,13 +998,13 @@ export default function App() {
             return beachIdMap[clientBeachId];
           }
           if (clientBeachId === 'carrizalillo' || clientBeachId === '00000000-0000-0000-0000-000000000001') {
-            const realBeach = beaches.find(b => b.name === 'Playa Carrizalillo');
+            const realBeach = beachesRef.current.find(b => b.name === 'Playa Carrizalillo');
             if (realBeach && realBeach.id !== 'carrizalillo' && realBeach.id !== '00000000-0000-0000-0000-000000000001') {
               return realBeach.id;
             }
           }
           if (clientBeachId === 'delfines' || clientBeachId === '00000000-0000-0000-0000-000000000002') {
-            const realBeach = beaches.find(b => b.name === 'Playa Delfines');
+            const realBeach = beachesRef.current.find(b => b.name === 'Playa Delfines');
             if (realBeach && realBeach.id !== 'delfines' && realBeach.id !== '00000000-0000-0000-0000-000000000002') {
               return realBeach.id;
             }
@@ -1010,12 +1018,12 @@ export default function App() {
             return accessIdMap[clientAccessId];
           }
           if (clientAccessId === 'acc-c1' || clientAccessId === '00000000-0000-0000-0000-000000000101') {
-            const realBeach = beaches.find(b => b.name === 'Playa Carrizalillo');
+            const realBeach = beachesRef.current.find(b => b.name === 'Playa Carrizalillo');
             const realAcc = realBeach?.accesses.find(a => a.name === 'Acceso peatonal Rinconada');
             if (realAcc) return realAcc.id;
           }
           if (clientAccessId === 'acc-d1' || clientAccessId === '00000000-0000-0000-0000-000000000102') {
-            const realBeach = beaches.find(b => b.name === 'Playa Delfines');
+            const realBeach = beachesRef.current.find(b => b.name === 'Playa Delfines');
             const realAcc = realBeach?.accesses.find(a => a.name === 'Acceso público El Mirador');
             if (realAcc) return realAcc.id;
           }
@@ -1096,7 +1104,7 @@ export default function App() {
       window.removeEventListener('offline', handleOffline);
       deregister();
     };
-  }, [beaches]);
+  }, []);
 
   // Monitor mobile screen size for rendering performance and Leaflet safety
   useEffect(() => {
@@ -1845,15 +1853,9 @@ export default function App() {
           </div>
 
           <div className="lg:col-span-5 flex justify-center items-center relative h-full w-full">
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full max-w-[420px] sm:max-w-[480px] lg:max-w-none h-auto aspect-square object-cover scale-125 mix-blend-screen pointer-events-none"
-              style={{ filter: 'hue-rotate(-55deg) saturate(250%) brightness(1.2) contrast(1.1)' }}
-              src="https://future.co/images/homepage/glassy-orb/orb-purple.webm"
-            />
+            <div className="glass-orb flex items-center justify-center shadow-2xl relative">
+              <div className="glass-orb-reflection" />
+            </div>
           </div>
         </div>
 
@@ -2193,6 +2195,7 @@ export default function App() {
                     {...({ tap: false } as any)}
                     className="w-full h-full"
                   >
+                    <MapResizer />
                     <ChangeMapView 
                       center={
                         (mapCenter && typeof mapCenter[0] === 'number' && !isNaN(mapCenter[0]) && typeof mapCenter[1] === 'number' && !isNaN(mapCenter[1])) 
