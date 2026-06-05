@@ -104,7 +104,7 @@ L.Icon.Default.mergeOptions({
 
 export default function App() {
   const [mobileSection, setMobileSection] = useState<'list' | 'map'>('list');
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
   const [isHighReputationUser, setIsHighReputationUser] = useState(false);
 
   // Sync state & connection queues
