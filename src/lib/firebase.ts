@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getDataConnect, connectDataConnectEmulator } from 'firebase/data-connect';
-import { getAuth, GoogleAuthProvider, connectAuthEmulator } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { connectorConfig } from '../dataconnect-generated';
 
 const firebaseConfig = {
@@ -32,8 +32,11 @@ if (isFirebaseConfigured) {
       connectDataConnectEmulator(dataConnectInstance, 'localhost', 9399);
       console.log('Connected to Firebase SQL Connect Emulator (localhost:9399)');
       
-      connectAuthEmulator(authInstance, 'http://localhost:9099', { disableWarnings: true });
-      console.log('Connected to Firebase Auth Emulator (http://localhost:9099)');
+      // Note: Firebase Auth emulator requires Java JRE to run. If Java is not installed,
+      // comment out connectAuthEmulator below to fall back to cloud-hosted Firebase Auth.
+      // connectAuthEmulator(authInstance, 'http://localhost:9099', { disableWarnings: true });
+      // console.log('Connected to Firebase Auth Emulator (http://localhost:9099)');
+      console.log('Firebase Auth configured to use Cloud Auth (emulator disabled due to missing Java environment)');
     } else {
       console.log('Firebase SQL Connect client successfully initialized!');
     }

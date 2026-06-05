@@ -70,6 +70,7 @@ export interface OfflineUserProfile {
   id: string;
   username: string;
   avatarUrl?: string;
+  bio?: string;
   reputation: number;
   timestamp: number;
 }

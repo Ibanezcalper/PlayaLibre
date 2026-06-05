@@ -47,3 +47,9 @@
 - **Entorno de Desarrollo Local:**
   - **Data Connect Emulator:** Operando en el puerto `9399` (`pgliteData` local).
   - **Firebase Auth Emulator:** Configurado y activo en el puerto `9099` (redirige las peticiones cliente localmente).
+
+---
+
+## 🛠️ 5. Gobernanza de Skills de Agentes
+- **Búsqueda y Adición de Skills:**
+  - Cuando el usuario solicite información sobre una skill o requiera agregar una skill, el agente debe utilizar prioritariamente la skill de auto skills para buscar e integrar una skill externa existente del registro oficial, evitando la creación de una skill propia local desde cero.

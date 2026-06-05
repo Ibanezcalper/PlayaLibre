@@ -4,6 +4,7 @@ type User @table {
   id: String! # Matches request.auth.uid (Firebase Auth ID)
   username: String!
   avatarUrl: String
+  bio: String
   reputation: Int! @default(value: 0)
   createdAt: Date! @default(expr: "request.time")
 }

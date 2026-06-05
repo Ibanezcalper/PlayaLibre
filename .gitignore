@@ -1,24 +1,72 @@
-# Logs
-logs
+# Node / Dependencies
+node_modules/
+.pnpm-debug.log*
+
+# Build & Cache Outputs
+dist/
+dist-ssr/
+build/
+.next/
+out/
+*.tsbuildinfo
+.tsbuildinfo
+
+# Environment Variables & Secrets (CRITICAL SECURITY)
+.env
+.env.*
+!.env.example
+*.env
+*.env.*
+
+# Private Keys, Certificates & Credentials (CRITICAL SECURITY)
+*.pem
+*.key
+*.pub
+*.p12
+*.p8
+*.der
+*.crt
+service-account*.json
+credential*.json
+*secret*.json
+firebase-key*.json
+googleService-Info.plist
+google-services.json
+client-secret*.json
+
+# Firebase SQL Connect / Emulators Local Data
+.firebase/
+dataconnect/.dataconnect/
+dataconnect-debug.log
+firebase-debug.log
+pglite-debug.log
+
+# Logs & Diagnostics
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# OS Junk Files
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+Icon?
 
-# Editor directories and files
+# IDE & Editor files
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
+!.vscode/tasks.json
+!.vscode/settings.json
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+*.sublime-project
+*.sublime-workspace

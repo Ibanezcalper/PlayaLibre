@@ -159,32 +159,48 @@ export interface ListBeachesData {
       avatarUrl?: string | null;
       reputation: number;
     } & User_Key;
-      accesses_on_beach: ({
-        id: UUIDString;
-        name: string;
-        latitude: number;
-        longitude: number;
-        trailGeometry?: unknown | null;
-        images?: unknown | null;
-        pets: boolean;
-        shade: boolean;
-        showers: boolean;
-        parking: boolean;
-        security: boolean;
-        ramps: boolean;
-        wheelchair: boolean;
-        parkingReserved: boolean;
-        alcoholAllowed: boolean;
-        campingAllowed: boolean;
-        feeRequired: boolean;
-        wifi: boolean;
-        cellular4G: boolean;
-        blockerType: string;
-        blockerName?: string | null;
-        blockerDescription?: string | null;
-        illegalFeeAmount: number;
+    accesses_on_beach: ({
+      id: UUIDString;
+      name: string;
+      latitude: number;
+      longitude: number;
+      trailGeometry?: unknown | null;
+      images?: unknown | null;
+      pets: boolean;
+      shade: boolean;
+      showers: boolean;
+      parking: boolean;
+      security: boolean;
+      ramps: boolean;
+      wheelchair: boolean;
+      parkingReserved: boolean;
+      alcoholAllowed: boolean;
+      campingAllowed: boolean;
+      feeRequired: boolean;
+      wifi: boolean;
+      cellular4G: boolean;
+      blockerType: string;
+      blockerName?: string | null;
+      blockerDescription?: string | null;
+      illegalFeeAmount: number;
+      reputation: number;
+      isPendingCuration: boolean;
+      createdAt: DateString;
+      user?: {
+        id: string;
+        username: string;
+        avatarUrl?: string | null;
         reputation: number;
-        isPendingCuration: boolean;
+      } & User_Key;
+      reports_on_access: ({
+        id: UUIDString;
+        reporterName: string;
+        blockerType: string;
+        blockerName: string;
+        description: string;
+        hasIllegalFee: boolean;
+        feeAmount?: number | null;
+        score: number;
         createdAt: DateString;
         user?: {
           id: string;
@@ -192,24 +208,8 @@ export interface ListBeachesData {
           avatarUrl?: string | null;
           reputation: number;
         } & User_Key;
-          reports_on_access: ({
-            id: UUIDString;
-            reporterName: string;
-            blockerType: string;
-            blockerName: string;
-            description: string;
-            hasIllegalFee: boolean;
-            feeAmount?: number | null;
-            score: number;
-            createdAt: DateString;
-            user?: {
-              id: string;
-              username: string;
-              avatarUrl?: string | null;
-              reputation: number;
-            } & User_Key;
-          } & Report_Key)[];
-      } & Access_Key)[];
+      } & Report_Key)[];
+    } & Access_Key)[];
   } & Beach_Key)[];
 }
 ```
@@ -301,32 +301,48 @@ export interface GetBeachDetailsData {
       reputation: number;
     } & User_Key;
   } & Beach_Key;
-    accesses: ({
-      id: UUIDString;
-      name: string;
-      latitude: number;
-      longitude: number;
-      trailGeometry?: unknown | null;
-      images?: unknown | null;
-      pets: boolean;
-      shade: boolean;
-      showers: boolean;
-      parking: boolean;
-      security: boolean;
-      ramps: boolean;
-      wheelchair: boolean;
-      parkingReserved: boolean;
-      alcoholAllowed: boolean;
-      campingAllowed: boolean;
-      feeRequired: boolean;
-      wifi: boolean;
-      cellular4G: boolean;
-      blockerType: string;
-      blockerName?: string | null;
-      blockerDescription?: string | null;
-      illegalFeeAmount: number;
+  accesses: ({
+    id: UUIDString;
+    name: string;
+    latitude: number;
+    longitude: number;
+    trailGeometry?: unknown | null;
+    images?: unknown | null;
+    pets: boolean;
+    shade: boolean;
+    showers: boolean;
+    parking: boolean;
+    security: boolean;
+    ramps: boolean;
+    wheelchair: boolean;
+    parkingReserved: boolean;
+    alcoholAllowed: boolean;
+    campingAllowed: boolean;
+    feeRequired: boolean;
+    wifi: boolean;
+    cellular4G: boolean;
+    blockerType: string;
+    blockerName?: string | null;
+    blockerDescription?: string | null;
+    illegalFeeAmount: number;
+    reputation: number;
+    isPendingCuration: boolean;
+    createdAt: DateString;
+    user?: {
+      id: string;
+      username: string;
+      avatarUrl?: string | null;
       reputation: number;
-      isPendingCuration: boolean;
+    } & User_Key;
+    reports_on_access: ({
+      id: UUIDString;
+      reporterName: string;
+      blockerType: string;
+      blockerName: string;
+      description: string;
+      hasIllegalFee: boolean;
+      feeAmount?: number | null;
+      score: number;
       createdAt: DateString;
       user?: {
         id: string;
@@ -334,24 +350,8 @@ export interface GetBeachDetailsData {
         avatarUrl?: string | null;
         reputation: number;
       } & User_Key;
-        reports_on_access: ({
-          id: UUIDString;
-          reporterName: string;
-          blockerType: string;
-          blockerName: string;
-          description: string;
-          hasIllegalFee: boolean;
-          feeAmount?: number | null;
-          score: number;
-          createdAt: DateString;
-          user?: {
-            id: string;
-            username: string;
-            avatarUrl?: string | null;
-            reputation: number;
-          } & User_Key;
-        } & Report_Key)[];
-    } & Access_Key)[];
+    } & Report_Key)[];
+  } & Access_Key)[];
 }
 ```
 
@@ -438,6 +438,7 @@ export interface GetUserData {
     id: string;
     username: string;
     avatarUrl?: string | null;
+    bio?: string | null;
     reputation: number;
     createdAt: DateString;
   } & User_Key;
@@ -1280,6 +1281,7 @@ export interface UpsertUserVariables {
   id: string;
   username: string;
   avatarUrl?: string | null;
+  bio?: string | null;
   reputation: number;
 }
 ```
@@ -1333,11 +1335,12 @@ export default function UpsertUserComponent() {
     id: ..., 
     username: ..., 
     avatarUrl: ..., // optional
+    bio: ..., // optional
     reputation: ..., 
   };
   mutation.mutate(upsertUserVars);
   // Variables can be defined inline as well.
-  mutation.mutate({ id: ..., username: ..., avatarUrl: ..., reputation: ..., });
+  mutation.mutate({ id: ..., username: ..., avatarUrl: ..., bio: ..., reputation: ..., });
 
   // You can also pass in a `useDataConnectMutationOptions` object to `UseMutationResult.mutate()`.
   const options = {

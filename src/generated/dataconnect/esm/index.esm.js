@@ -1,11 +1,10 @@
-import { queryRef, executeQuery, mutationRef, executeMutation, validateArgs } from 'firebase/data-connect';
+import { queryRef, executeQuery, validateArgsWithOptions, mutationRef, executeMutation, validateArgs } from 'firebase/data-connect';
 
 export const connectorConfig = {
   connector: 'default-connector',
   service: 'playas-libres-service',
   location: 'us-central1'
 };
-
 export const createBeachRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
   dcInstance._useGeneratedSdk();
@@ -14,7 +13,8 @@ export const createBeachRef = (dcOrVars, vars) => {
 createBeachRef.operationName = 'CreateBeach';
 
 export function createBeach(dcOrVars, vars) {
-  return executeMutation(createBeachRef(dcOrVars, vars));
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(createBeachRef(dcInstance, inputVars));
 }
 
 export const createAccessRef = (dcOrVars, vars) => {
@@ -25,7 +25,8 @@ export const createAccessRef = (dcOrVars, vars) => {
 createAccessRef.operationName = 'CreateAccess';
 
 export function createAccess(dcOrVars, vars) {
-  return executeMutation(createAccessRef(dcOrVars, vars));
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(createAccessRef(dcInstance, inputVars));
 }
 
 export const createReportRef = (dcOrVars, vars) => {
@@ -36,7 +37,8 @@ export const createReportRef = (dcOrVars, vars) => {
 createReportRef.operationName = 'CreateReport';
 
 export function createReport(dcOrVars, vars) {
-  return executeMutation(createReportRef(dcOrVars, vars));
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(createReportRef(dcInstance, inputVars));
 }
 
 export const updateAccessCurationRef = (dcOrVars, vars) => {
@@ -47,7 +49,8 @@ export const updateAccessCurationRef = (dcOrVars, vars) => {
 updateAccessCurationRef.operationName = 'UpdateAccessCuration';
 
 export function updateAccessCuration(dcOrVars, vars) {
-  return executeMutation(updateAccessCurationRef(dcOrVars, vars));
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(updateAccessCurationRef(dcInstance, inputVars));
 }
 
 export const updateReportScoreRef = (dcOrVars, vars) => {
@@ -58,7 +61,8 @@ export const updateReportScoreRef = (dcOrVars, vars) => {
 updateReportScoreRef.operationName = 'UpdateReportScore';
 
 export function updateReportScore(dcOrVars, vars) {
-  return executeMutation(updateReportScoreRef(dcOrVars, vars));
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(updateReportScoreRef(dcInstance, inputVars));
 }
 
 export const deleteReportRef = (dcOrVars, vars) => {
@@ -69,7 +73,8 @@ export const deleteReportRef = (dcOrVars, vars) => {
 deleteReportRef.operationName = 'DeleteReport';
 
 export function deleteReport(dcOrVars, vars) {
-  return executeMutation(deleteReportRef(dcOrVars, vars));
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(deleteReportRef(dcInstance, inputVars));
 }
 
 export const upsertUserRef = (dcOrVars, vars) => {
@@ -80,7 +85,8 @@ export const upsertUserRef = (dcOrVars, vars) => {
 upsertUserRef.operationName = 'UpsertUser';
 
 export function upsertUser(dcOrVars, vars) {
-  return executeMutation(upsertUserRef(dcOrVars, vars));
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(upsertUserRef(dcInstance, inputVars));
 }
 
 export const updateUserReputationRef = (dcOrVars, vars) => {
@@ -91,7 +97,8 @@ export const updateUserReputationRef = (dcOrVars, vars) => {
 updateUserReputationRef.operationName = 'UpdateUserReputation';
 
 export function updateUserReputation(dcOrVars, vars) {
-  return executeMutation(updateUserReputationRef(dcOrVars, vars));
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(updateUserReputationRef(dcInstance, inputVars));
 }
 
 export const createCommentRef = (dcOrVars, vars) => {
@@ -102,7 +109,8 @@ export const createCommentRef = (dcOrVars, vars) => {
 createCommentRef.operationName = 'CreateComment';
 
 export function createComment(dcOrVars, vars) {
-  return executeMutation(createCommentRef(dcOrVars, vars));
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(createCommentRef(dcInstance, inputVars));
 }
 
 export const deleteCommentRef = (dcOrVars, vars) => {
@@ -113,7 +121,8 @@ export const deleteCommentRef = (dcOrVars, vars) => {
 deleteCommentRef.operationName = 'DeleteComment';
 
 export function deleteComment(dcOrVars, vars) {
-  return executeMutation(deleteCommentRef(dcOrVars, vars));
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(deleteCommentRef(dcInstance, inputVars));
 }
 
 export const listBeachesRef = (dc) => {
@@ -123,8 +132,10 @@ export const listBeachesRef = (dc) => {
 }
 listBeachesRef.operationName = 'ListBeaches';
 
-export function listBeaches(dc) {
-  return executeQuery(listBeachesRef(dc));
+export function listBeaches(dcOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrOptions, options, undefined,false, false);
+  return executeQuery(listBeachesRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
 }
 
 export const getBeachDetailsRef = (dcOrVars, vars) => {
@@ -134,8 +145,10 @@ export const getBeachDetailsRef = (dcOrVars, vars) => {
 }
 getBeachDetailsRef.operationName = 'GetBeachDetails';
 
-export function getBeachDetails(dcOrVars, vars) {
-  return executeQuery(getBeachDetailsRef(dcOrVars, vars));
+export function getBeachDetails(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
+  return executeQuery(getBeachDetailsRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
 }
 
 export const getUserRef = (dcOrVars, vars) => {
@@ -145,8 +158,10 @@ export const getUserRef = (dcOrVars, vars) => {
 }
 getUserRef.operationName = 'GetUser';
 
-export function getUser(dcOrVars, vars) {
-  return executeQuery(getUserRef(dcOrVars, vars));
+export function getUser(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
+  return executeQuery(getUserRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
 }
 
 export const getCommentsForBeachRef = (dcOrVars, vars) => {
@@ -156,7 +171,9 @@ export const getCommentsForBeachRef = (dcOrVars, vars) => {
 }
 getCommentsForBeachRef.operationName = 'GetCommentsForBeach';
 
-export function getCommentsForBeach(dcOrVars, vars) {
-  return executeQuery(getCommentsForBeachRef(dcOrVars, vars));
+export function getCommentsForBeach(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
+  return executeQuery(getCommentsForBeachRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
 }
 

@@ -152,12 +152,14 @@ mutation UpsertUser(
   $id: String!
   $username: String!
   $avatarUrl: String
+  $bio: String
   $reputation: Int!
 ) @auth(level: PUBLIC) {
   user_upsert(data: {
     id: $id
     username: $username
     avatarUrl: $avatarUrl
+    bio: $bio
     reputation: $reputation
   })
 }

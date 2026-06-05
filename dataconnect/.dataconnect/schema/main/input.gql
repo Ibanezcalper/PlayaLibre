@@ -2245,6 +2245,14 @@ input User_Data {
   """
   avatarUrl_expr: String_Expr
   """
+  ✨ Generated from Field `User`.`bio` of type `String`
+  """
+  bio: String
+  """
+  ✨ `_expr` server value variant of `bio` (✨ Generated from Field `User`.`bio` of type `String`)
+  """
+  bio_expr: String_Expr
+  """
   ✨ Generated from Field `User`.`createdAt` of type `Date!`
   """
   createdAt: Date
@@ -2305,6 +2313,10 @@ input User_Filter {
   ✨ Generated from Field `User`.`avatarUrl` of type `String`
   """
   avatarUrl: String_Filter
+  """
+  ✨ Generated from Field `User`.`bio` of type `String`
+  """
+  bio: String_Filter
   """
   ✨ Generated from Field `User`.`createdAt` of type `Date!`
   """
@@ -2375,6 +2387,10 @@ input User_Having {
   ✨ Generated from Field `User`.`avatarUrl_count` of type `Int!`
   """
   avatarUrl_count: Int_Filter
+  """
+  ✨ Generated from Field `User`.`bio_count` of type `Int!`
+  """
+  bio_count: Int_Filter
   """
   ✨ Generated from Field `User`.`createdAt_count` of type `Int!`
   """
@@ -2455,6 +2471,10 @@ input User_Order {
   """
   avatarUrl: OrderDirection
   """
+  ✨ Generated from Field `User`.`bio` of type `String`
+  """
+  bio: OrderDirection
+  """
   ✨ Generated from Field `User`.`createdAt` of type `Date!`
   """
   createdAt: OrderDirection
@@ -2474,6 +2494,10 @@ input User_Order {
   ✨ Generated from Field `User`.`avatarUrl_count` of type `Int!`
   """
   avatarUrl_count: OrderDirection
+  """
+  ✨ Generated from Field `User`.`bio_count` of type `Int!`
+  """
+  bio_count: OrderDirection
   """
   ✨ Generated from Field `User`.`createdAt_count` of type `Int!`
   """

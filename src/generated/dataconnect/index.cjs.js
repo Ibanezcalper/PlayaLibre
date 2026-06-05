@@ -1,4 +1,4 @@
-const { queryRef, executeQuery, mutationRef, executeMutation, validateArgs } = require('firebase/data-connect');
+const { queryRef, executeQuery, validateArgsWithOptions, mutationRef, executeMutation, validateArgs } = require('firebase/data-connect');
 
 const connectorConfig = {
   connector: 'default-connector',
@@ -16,8 +16,10 @@ createBeachRef.operationName = 'CreateBeach';
 exports.createBeachRef = createBeachRef;
 
 exports.createBeach = function createBeach(dcOrVars, vars) {
-  return executeMutation(createBeachRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(createBeachRef(dcInstance, inputVars));
+}
+;
 
 const createAccessRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -28,8 +30,10 @@ createAccessRef.operationName = 'CreateAccess';
 exports.createAccessRef = createAccessRef;
 
 exports.createAccess = function createAccess(dcOrVars, vars) {
-  return executeMutation(createAccessRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(createAccessRef(dcInstance, inputVars));
+}
+;
 
 const createReportRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -40,8 +44,10 @@ createReportRef.operationName = 'CreateReport';
 exports.createReportRef = createReportRef;
 
 exports.createReport = function createReport(dcOrVars, vars) {
-  return executeMutation(createReportRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(createReportRef(dcInstance, inputVars));
+}
+;
 
 const updateAccessCurationRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -52,8 +58,10 @@ updateAccessCurationRef.operationName = 'UpdateAccessCuration';
 exports.updateAccessCurationRef = updateAccessCurationRef;
 
 exports.updateAccessCuration = function updateAccessCuration(dcOrVars, vars) {
-  return executeMutation(updateAccessCurationRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(updateAccessCurationRef(dcInstance, inputVars));
+}
+;
 
 const updateReportScoreRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -64,8 +72,10 @@ updateReportScoreRef.operationName = 'UpdateReportScore';
 exports.updateReportScoreRef = updateReportScoreRef;
 
 exports.updateReportScore = function updateReportScore(dcOrVars, vars) {
-  return executeMutation(updateReportScoreRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(updateReportScoreRef(dcInstance, inputVars));
+}
+;
 
 const deleteReportRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -76,8 +86,10 @@ deleteReportRef.operationName = 'DeleteReport';
 exports.deleteReportRef = deleteReportRef;
 
 exports.deleteReport = function deleteReport(dcOrVars, vars) {
-  return executeMutation(deleteReportRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(deleteReportRef(dcInstance, inputVars));
+}
+;
 
 const upsertUserRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -88,8 +100,10 @@ upsertUserRef.operationName = 'UpsertUser';
 exports.upsertUserRef = upsertUserRef;
 
 exports.upsertUser = function upsertUser(dcOrVars, vars) {
-  return executeMutation(upsertUserRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(upsertUserRef(dcInstance, inputVars));
+}
+;
 
 const updateUserReputationRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -100,8 +114,10 @@ updateUserReputationRef.operationName = 'UpdateUserReputation';
 exports.updateUserReputationRef = updateUserReputationRef;
 
 exports.updateUserReputation = function updateUserReputation(dcOrVars, vars) {
-  return executeMutation(updateUserReputationRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(updateUserReputationRef(dcInstance, inputVars));
+}
+;
 
 const createCommentRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -112,8 +128,10 @@ createCommentRef.operationName = 'CreateComment';
 exports.createCommentRef = createCommentRef;
 
 exports.createComment = function createComment(dcOrVars, vars) {
-  return executeMutation(createCommentRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(createCommentRef(dcInstance, inputVars));
+}
+;
 
 const deleteCommentRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -124,8 +142,10 @@ deleteCommentRef.operationName = 'DeleteComment';
 exports.deleteCommentRef = deleteCommentRef;
 
 exports.deleteComment = function deleteComment(dcOrVars, vars) {
-  return executeMutation(deleteCommentRef(dcOrVars, vars));
-};
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(deleteCommentRef(dcInstance, inputVars));
+}
+;
 
 const listBeachesRef = (dc) => {
   const { dc: dcInstance} = validateArgs(connectorConfig, dc, undefined);
@@ -135,9 +155,12 @@ const listBeachesRef = (dc) => {
 listBeachesRef.operationName = 'ListBeaches';
 exports.listBeachesRef = listBeachesRef;
 
-exports.listBeaches = function listBeaches(dc) {
-  return executeQuery(listBeachesRef(dc));
-};
+exports.listBeaches = function listBeaches(dcOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrOptions, options, undefined,false, false);
+  return executeQuery(listBeachesRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+}
+;
 
 const getBeachDetailsRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -147,9 +170,12 @@ const getBeachDetailsRef = (dcOrVars, vars) => {
 getBeachDetailsRef.operationName = 'GetBeachDetails';
 exports.getBeachDetailsRef = getBeachDetailsRef;
 
-exports.getBeachDetails = function getBeachDetails(dcOrVars, vars) {
-  return executeQuery(getBeachDetailsRef(dcOrVars, vars));
-};
+exports.getBeachDetails = function getBeachDetails(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
+  return executeQuery(getBeachDetailsRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+}
+;
 
 const getUserRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -159,9 +185,12 @@ const getUserRef = (dcOrVars, vars) => {
 getUserRef.operationName = 'GetUser';
 exports.getUserRef = getUserRef;
 
-exports.getUser = function getUser(dcOrVars, vars) {
-  return executeQuery(getUserRef(dcOrVars, vars));
-};
+exports.getUser = function getUser(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
+  return executeQuery(getUserRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+}
+;
 
 const getCommentsForBeachRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
@@ -171,6 +200,9 @@ const getCommentsForBeachRef = (dcOrVars, vars) => {
 getCommentsForBeachRef.operationName = 'GetCommentsForBeach';
 exports.getCommentsForBeachRef = getCommentsForBeachRef;
 
-exports.getCommentsForBeach = function getCommentsForBeach(dcOrVars, vars) {
-  return executeQuery(getCommentsForBeachRef(dcOrVars, vars));
-};
+exports.getCommentsForBeach = function getCommentsForBeach(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
+  return executeQuery(getCommentsForBeachRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+}
+;

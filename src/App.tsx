@@ -3,42 +3,32 @@ import { motion } from 'framer-motion';
 import {
   AlertTriangle,
   Plus,
-  MapPin,
   Check,
-  ThumbsUp,
-  ThumbsDown,
   WifiOff,
-  X,
   Info,
   CheckCircle2,
   ArrowRight,
-  ChevronLeft,
   User,
   LogOut,
-  MessageSquare,
-  Send,
-  Camera,
   Award
 } from 'lucide-react';
 
-import {
-  ResponsiveContainer,
-  AreaChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Area,
-  Legend
-} from 'recharts';
-
-// React-Leaflet Map Imports for OpenStreetMap
-import { MapContainer, TileLayer, Marker, Popup, Polygon, Polyline, useMapEvents, ZoomControl, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polygon, Polyline, ZoomControl } from 'react-leaflet';
 import * as L from 'leaflet';
 
 // Firebase SQL Connect Imports
 import { dataConnectInstance, authInstance, googleProvider, isFirebaseConfigured } from './lib/firebase';
-import { signInWithPopup, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, linkWithCredential, GoogleAuthProvider, EmailAuthProvider, sendEmailVerification } from 'firebase/auth';
+import {
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  linkWithCredential,
+  GoogleAuthProvider,
+  EmailAuthProvider,
+  sendEmailVerification
+} from 'firebase/auth';
 import { subscribe } from 'firebase/data-connect';
 import {
   listBeachesRef,
@@ -55,358 +45,40 @@ import {
   getCommentsForBeach
 } from './dataconnect-generated';
 
-// Fix default marker icon assets in Vite compiled bundle
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-});
+// Shared Types
+import type { UserProfile, Beach, Access, IncidentReport } from './types';
 
-interface UserProfile {
-  id: string;
-  username: string;
-  avatarUrl?: string;
-  reputation: number;
-}
+// Shared Constants
+import {
+  MEXICAN_STATES,
+  STATE_COASTAL_COORDINATES,
+  AVATAR_PRESETS,
+  INITIAL_BEACHES
+} from './constants';
 
-// Beach Data Interface (territorial boundary polygon)
-interface Beach {
-  id: string;
-  name: string;
-  state: string;
-  latitude: number;
-  longitude: number;
-  boundaryPolygon?: [number, number][];
-  images?: string[];
-  user?: UserProfile;
-  accesses: Access[];
-  createdAt?: string;
-}
+// Utilities
+import { calculateDistance } from './utils/geo';
+import { hashSHA1 } from './utils/crypto';
+import { mapDbBeachToFrontend } from './utils/mappers';
 
-// Access Point Interface (entrance coordinates, walking trail polyline and reports)
-interface Access {
-  id: string;
-  beachId: string;
-  name: string;
-  latitude: number;
-  longitude: number;
-  trailGeometry?: [number, number][];
-  images?: string[];
-  user?: UserProfile;
-  pets: boolean;
-  shade: boolean;
-  showers: boolean;
-  parking: boolean;
-  security: boolean;
-  ramps: boolean;
-  wheelchair: boolean;
-  parkingReserved: boolean;
-  alcoholAllowed: boolean;
-  campingAllowed: boolean;
-  feeRequired: boolean;
-  wifi: boolean;
-  cellular4G: boolean;
-  blockerType: 'None' | 'Hotel' | 'Condo' | 'Restaurant' | 'Beach Club' | 'Private Property' | 'Insecurity' | 'Other';
-  blockerName?: string;
-  blockerDescription?: string;
-  illegalFeeAmount: number;
-  reputation: number; // 0-100 score
-  isPendingCuration?: boolean;
-  incidentReports: IncidentReport[];
-  reportsHistory: { month: string; reports: number; fees: number }[];
-}
+// Components
+import { UserAvatar } from './components/common/UserAvatar';
+import { MapEvents } from './components/map/MapEvents';
+import { ChangeMapView } from './components/map/ChangeMapView';
+import { SidebarPanel } from './components/panels/SidebarPanel';
 
-interface IncidentReport {
-  id: string;
-  reporterName: string;
-  blockerType: 'Hotel' | 'Condo' | 'Restaurant' | 'Beach Club' | 'Private Property' | 'Insecurity' | 'Other';
-  blockerName: string;
-  description: string;
-  hasIllegalFee: boolean;
-  feeAmount?: number;
-  score: number;
-  timestamp: number;
-  user?: UserProfile;
-}
+// Modals
+import { LightboxModal } from './components/modals/LightboxModal';
+import { AuthPromptModal } from './components/modals/AuthPromptModal';
+import { EmailVerificationPendingModal } from './components/modals/EmailVerificationPendingModal';
+import { ProfileSetupModal } from './components/modals/ProfileSetupModal';
+import { UserProfileViewModal } from './components/modals/UserProfileViewModal';
+import { ReportBlockerModal } from './components/modals/ReportBlockerModal';
+import { NewBeachModal } from './components/modals/NewBeachModal';
+import { NewAccessModal } from './components/modals/NewAccessModal';
+import { BeachDetailsModal } from './components/modals/BeachDetailsModal';
 
-// Haversine formula to compute distance in km between coordinates
-function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371; // Earth radius in km
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
-
-// 17 coastal states of Mexico
-const MEXICAN_STATES = [
-  'Baja California',
-  'Baja California Sur',
-  'Sonora',
-  'Sinaloa',
-  'Nayarit',
-  'Jalisco',
-  'Colima',
-  'Michoacán',
-  'Guerrero',
-  'Oaxaca',
-  'Chiapas',
-  'Tamaulipas',
-  'Veracruz',
-  'Tabasco',
-  'Campeche',
-  'Yucatán',
-  'Quintana Roo'
-];
-
-const STATE_COASTAL_COORDINATES: Record<string, [number, number]> = {
-  'Baja California': [31.8667, -116.6000],
-  'Baja California Sur': [24.1426, -110.3128],
-  'Sonora': [27.9179, -110.8989],
-  'Sinaloa': [23.2329, -106.4168],
-  'Nayarit': [20.7678, -105.3117],
-  'Jalisco': [20.6534, -105.2253],
-  'Colima': [19.0522, -104.3158],
-  'Michoacán': [17.9859, -102.2031],
-  'Guerrero': [16.8531, -99.8236],
-  'Oaxaca': [15.8617, -97.0786],
-  'Chiapas': [15.9000, -93.7500],
-  'Tamaulipas': [22.2816, -97.8349],
-  'Veracruz': [19.1738, -96.1342],
-  'Tabasco': [18.4239, -93.0211],
-  'Campeche': [19.8301, -90.5418],
-  'Yucatán': [21.2811, -89.6647],
-  'Quintana Roo': [21.1619, -86.8515]
-};
-
-const AVATAR_PRESETS = [
-  { emoji: '🏄‍♂️', label: 'Surfista', bg: 'from-blue-400 to-indigo-500' },
-  { emoji: '🌴', label: 'Palmera', bg: 'from-emerald-400 to-teal-500' },
-  { emoji: '🐬', label: 'Delfín', bg: 'from-cyan-400 to-blue-500' },
-  { emoji: '🦀', label: 'Cangrejo', bg: 'from-red-400 to-orange-500' },
-  { emoji: '🌅', label: 'Amanecer', bg: 'from-amber-400 to-rose-500' },
-  { emoji: '⛵', label: 'Velero', bg: 'from-sky-400 to-indigo-500' },
-  { emoji: '🐚', label: 'Concha', bg: 'from-pink-400 to-rose-500' },
-  { emoji: '🐠', label: 'Pez', bg: 'from-yellow-400 to-orange-500' }
-];
-
-const INITIAL_BEACHES: Beach[] = [
-  {
-    id: '00000000-0000-0000-0000-000000000001',
-    name: 'Playa Carrizalillo',
-    state: 'Oaxaca',
-    latitude: 15.8617,
-    longitude: -97.0786,
-    boundaryPolygon: [
-      [15.8622, -97.0789],
-      [15.8626, -97.0780],
-      [15.8612, -97.0776],
-      [15.8610, -97.0785]
-    ],
-    images: [],
-    accesses: [
-      {
-        id: '00000000-0000-0000-0000-000000000101',
-        beachId: '00000000-0000-0000-0000-000000000001',
-        name: 'Acceso peatonal Rinconada',
-        latitude: 15.8624,
-        longitude: -97.0783,
-        trailGeometry: [
-          [15.8624, -97.0783],
-          [15.8621, -97.0782],
-          [15.8617, -97.0786]
-        ],
-        images: [],
-        pets: true,
-        shade: true,
-        showers: true,
-        parking: false,
-        security: true,
-        ramps: false,
-        wheelchair: false,
-        parkingReserved: false,
-        alcoholAllowed: true,
-        campingAllowed: false,
-        feeRequired: false,
-        wifi: false,
-        cellular4G: true,
-        blockerType: 'Restaurant',
-        blockerName: 'Club de Playa Sunset',
-        blockerDescription: 'Restaurantes locales invaden la bajada principal con camastros privados y exigen consumo obligatorio de $500 MXN para transitar por la arena.',
-        illegalFeeAmount: 500,
-        reputation: 72,
-        isPendingCuration: false,
-        reportsHistory: [
-          { month: 'Ene', reports: 1, fees: 0 },
-          { month: 'Feb', reports: 2, fees: 1 },
-          { month: 'Mar', reports: 4, fees: 2 }
-        ],
-        incidentReports: [
-          {
-            id: '00000000-0000-0000-0000-000000000201',
-            reporterName: 'Rodrigo M.',
-            blockerType: 'Restaurant',
-            blockerName: 'Restaurante El Faro',
-            description: 'Intentaron cobrarme $200 MXN solo por cruzar entre sus mesas para llegar a la playa pública.',
-            hasIllegalFee: true,
-            feeAmount: 200,
-            score: 8,
-            timestamp: Date.now() - 5 * 24 * 60 * 60 * 1000
-          },
-          {
-            id: '00000000-0000-0000-0000-000000000202',
-            reporterName: 'Sofía G.',
-            blockerType: 'Private Property',
-            blockerName: 'Condominios Vista Hermosa',
-            description: 'Cerraron la reja metálica del sendero peatonal tradicional de bajada a la bahía.',
-            hasIllegalFee: false,
-            score: 12,
-            timestamp: Date.now() - 12 * 24 * 60 * 60 * 1000
-          },
-          {
-            id: '00000000-0000-0000-0000-000000000203',
-            reporterName: 'Carlos T.',
-            blockerType: 'Insecurity',
-            blockerName: 'Zona Federal',
-            description: 'Guardias de seguridad privados amedrentan y acosan a surfistas locales cerca del acceso principal.',
-            hasIllegalFee: false,
-            score: 5,
-            timestamp: Date.now() - 2 * 24 * 60 * 60 * 1000
-          }
-        ]
-      }
-    ]
-  },
-  {
-    id: '00000000-0000-0000-0000-000000000002',
-    name: 'Playa Delfines',
-    state: 'Quintana Roo',
-    latitude: 21.0604,
-    longitude: -86.7797,
-    boundaryPolygon: [
-      [21.0610, -86.7802],
-      [21.0615, -86.7792],
-      [21.0598, -86.7788],
-      [21.0593, -86.7798]
-    ],
-    images: [],
-    accesses: [
-      {
-        id: '00000000-0000-0000-0000-000000000102',
-        beachId: '00000000-0000-0000-0000-000000000002',
-        name: 'Acceso público El Mirador',
-        latitude: 21.0608,
-        longitude: -86.7800,
-        trailGeometry: [
-          [21.0608, -86.7800],
-          [21.0605, -86.7798],
-          [21.0604, -86.7797]
-        ],
-        images: [],
-        pets: false,
-        shade: true,
-        showers: true,
-        parking: true,
-        security: true,
-        ramps: true,
-        wheelchair: true,
-        parkingReserved: true,
-        alcoholAllowed: false,
-        campingAllowed: false,
-        feeRequired: false,
-        wifi: true,
-        cellular4G: true,
-        blockerType: 'Hotel',
-        blockerName: 'Gran Oasis Riviera',
-        blockerDescription: 'El hotel coloca guardias armados y vallas en la zona federal marítima para prohibir a turistas que no son huéspedes transitar o tender toallas.',
-        illegalFeeAmount: 0,
-        reputation: 85,
-        isPendingCuration: false,
-        reportsHistory: [
-          { month: 'Ene', reports: 0, fees: 0 },
-          { month: 'Feb', reports: 1, fees: 0 }
-        ],
-        incidentReports: [
-          {
-            id: '00000000-0000-0000-0000-000000000204',
-            reporterName: 'Mariana K.',
-            blockerType: 'Hotel',
-            blockerName: 'Resort Paradisus',
-            description: 'Los elementos de seguridad del hotel exigen que te retires de la arena enfrente de sus instalaciones alegando que es propiedad del hotel.',
-            hasIllegalFee: false,
-            score: 15,
-            timestamp: Date.now() - 2 * 24 * 60 * 60 * 1000
-          }
-        ]
-      }
-    ]
-  }
-];
-
-// Leaflet Map Click Events Subcomponent
-interface MapEventsProps {
-  onMapClick: (lat: number, lng: number) => void;
-}
-
-function MapEvents({ onMapClick }: MapEventsProps) {
-  useMapEvents({
-    click(e) {
-      onMapClick(e.latlng.lat, e.latlng.lng);
-    }
-  });
-  return null;
-}
-
-// Component to programmatically re-center and zoom Leaflet map
-function ChangeMapView({ center, zoom }: { center: [number, number]; zoom: number }) {
-  const map = useMap();
-  useEffect(() => {
-    map.flyTo(center, zoom, { duration: 1.5 });
-  }, [center, zoom, map]);
-  return null;
-}
-
-// User Avatar renderer component
-function UserAvatar({ avatarUrl, username, size = 'md' }: { avatarUrl?: string; username: string; size?: 'sm' | 'md' | 'lg' }) {
-  const sizeClasses = {
-    sm: 'w-7 h-7 text-xs',
-    md: 'w-10 h-10 text-lg',
-    lg: 'w-16 h-16 text-3xl'
-  }[size];
-
-  if (avatarUrl && avatarUrl.startsWith('preset:')) {
-    const [_, emoji, bg] = avatarUrl.split(':');
-    return (
-      <div className={`rounded-full bg-gradient-to-br ${bg || 'from-gray-400 to-gray-600'} flex items-center justify-center text-white font-sans ${sizeClasses} shadow-sm border border-white/20 select-none`}>
-        {emoji}
-      </div>
-    );
-  }
-
-  if (avatarUrl) {
-    return (
-      <img
-        src={avatarUrl}
-        alt={username}
-        className={`rounded-full object-cover border border-black/10 shadow-sm ${sizeClasses}`}
-      />
-    );
-  }
-
-  // Fallback to initial letters
-  const initial = username ? username.charAt(0).toUpperCase() : '?';
-  return (
-    <div className={`rounded-full bg-gradient-to-br from-blue-500 to-indigo-655 flex items-center justify-center text-white font-bold font-sans ${sizeClasses} border border-white/20 select-none`}>
-      {initial}
-    </div>
-  );
-}
-
+// Offline Sync
 import {
   saveOfflineReport,
   getOfflineReports,
@@ -420,121 +92,15 @@ import {
   getOfflineUserProfile,
   registerSyncHandler
 } from './lib/offline-sync';
-import type {
-  OfflineBeach,
-  OfflineAccess,
-  OfflineReport
-} from './lib/offline-sync';
+import type { OfflineReport, OfflineBeach, OfflineAccess } from './lib/offline-sync';
 
-// Map database flat SQL Connect output structure into nested hierarchy expected by the client
-const mapDbBeachToFrontend = (dbBeach: any): Beach => {
-  const accesses = (dbBeach.accesses_on_beach || []).map((acc: any) => {
-    const incidentReports = (acc.reports_on_access || []).map((r: any) => ({
-      id: r.id,
-      reporterName: r.reporterName || 'Anónimo',
-      blockerType: r.blockerType,
-      blockerName: r.blockerName,
-      description: r.description,
-      hasIllegalFee: r.hasIllegalFee,
-      feeAmount: r.feeAmount || 0,
-      score: r.score || 1,
-      timestamp: r.createdAt ? new Date(r.createdAt).getTime() : Date.now(),
-      user: r.user ? {
-        id: r.user.id,
-        username: r.user.username,
-        avatarUrl: r.user.avatarUrl,
-        reputation: r.user.reputation
-      } : undefined
-    }));
-
-    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-    const historyMap: Record<string, { reports: number; fees: number }> = {};
-    const currentMonthIdx = new Date().getMonth();
-    const prevMonthIdx = (currentMonthIdx - 1 + 12) % 12;
-    historyMap[months[prevMonthIdx]] = { reports: 0, fees: 0 };
-    historyMap[months[currentMonthIdx]] = { reports: 0, fees: 0 };
-
-    incidentReports.forEach((r: any) => {
-      const m = months[new Date(r.timestamp).getMonth()];
-      if (!historyMap[m]) {
-        historyMap[m] = { reports: 0, fees: 0 };
-      }
-      historyMap[m].reports += 1;
-      if (r.hasIllegalFee) {
-        historyMap[m].fees += 1;
-      }
-    });
-
-    const reportsHistory = Object.entries(historyMap).map(([month, data]) => ({
-      month,
-      reports: data.reports,
-      fees: data.fees,
-    }));
-
-    return {
-      id: acc.id,
-      beachId: dbBeach.id,
-      name: acc.name,
-      latitude: acc.latitude,
-      longitude: acc.longitude,
-      trailGeometry: typeof acc.trailGeometry === 'string' ? JSON.parse(acc.trailGeometry) : acc.trailGeometry,
-      images: acc.images ? (typeof acc.images === 'string' ? JSON.parse(acc.images) : acc.images) : [],
-      pets: acc.pets,
-      shade: acc.shade,
-      showers: acc.showers,
-      parking: acc.parking,
-      security: acc.security,
-      ramps: acc.ramps,
-      wheelchair: acc.wheelchair,
-      parkingReserved: acc.parkingReserved,
-      alcoholAllowed: acc.alcoholAllowed,
-      campingAllowed: acc.campingAllowed,
-      feeRequired: acc.feeRequired,
-      wifi: acc.wifi,
-      cellular4G: acc.cellular4G,
-      blockerType: acc.blockerType as any,
-      blockerName: acc.blockerName || undefined,
-      blockerDescription: acc.blockerDescription || undefined,
-      illegalFeeAmount: acc.illegalFeeAmount || 0,
-      reputation: acc.reputation ?? 90,
-      isPendingCuration: acc.isPendingCuration ?? true,
-      reportsHistory,
-      incidentReports,
-      user: acc.user ? {
-        id: acc.user.id,
-        username: acc.user.username,
-        avatarUrl: acc.user.avatarUrl,
-        reputation: acc.user.reputation
-      } : undefined
-    };
-  });
-
-  return {
-    id: dbBeach.id,
-    name: dbBeach.name,
-    state: dbBeach.state,
-    latitude: dbBeach.latitude,
-    longitude: dbBeach.longitude,
-    boundaryPolygon: typeof dbBeach.boundaryPolygon === 'string' ? JSON.parse(dbBeach.boundaryPolygon) : dbBeach.boundaryPolygon,
-    images: dbBeach.images ? (typeof dbBeach.images === 'string' ? JSON.parse(dbBeach.images) : dbBeach.images) : [],
-    accesses,
-    user: dbBeach.user ? {
-      id: dbBeach.user.id,
-      username: dbBeach.user.username,
-      avatarUrl: dbBeach.user.avatarUrl,
-      reputation: dbBeach.user.reputation
-    } : undefined
-  };
-};
-
-// Helper to hash password to SHA-1 using browser SubtleCrypto API
-async function hashSHA1(message: string): Promise<string> {
-  const msgBuffer = new TextEncoder().encode(message);
-  const hashBuffer = await window.crypto.subtle.digest('SHA-1', msgBuffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  return hashHex;
-}
+// Fix default marker icon assets in Vite compiled bundle
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
 
 export default function App() {
   const [mobileSection, setMobileSection] = useState<'list' | 'map'>('list');
@@ -570,6 +136,13 @@ export default function App() {
   const [pendingLinkCredential, setPendingLinkCredential] = useState<any>(null);
   const [isEmailVerificationPending, setIsEmailVerificationPending] = useState(false);
 
+  // Profile View States
+  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [selectedUserProfile, setSelectedUserProfile] = useState<any | null>(null);
+  const [isProfileViewOpen, setIsProfileViewOpen] = useState(false);
+  const [isEditingBio, setIsEditingBio] = useState(false);
+  const [editBioText, setEditBioText] = useState('');
+
   // Base64 Images Upload
   const [newBeachImages, setNewBeachImages] = useState<string[]>([]);
   const [newAccessImages, setNewAccessImages] = useState<string[]>([]);
@@ -586,7 +159,7 @@ export default function App() {
   const [isFormMinimized, setIsFormMinimized] = useState(false);
   const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'warn' | 'info' } | null>(null);
 
-  // Search query & filters (all text styled in Spanish sentence-case)
+  // Search query & filters
   const [searchQuery, setSearchQuery] = useState('');
   const [filterBlocker, setFilterBlocker] = useState<string>('ALL');
 
@@ -681,7 +254,16 @@ export default function App() {
   useEffect(() => {
     const cached = localStorage.getItem('playalibre_user_profile');
     if (cached) {
-      setUserProfile(JSON.parse(cached));
+      const parsed = JSON.parse(cached);
+      setUserProfile(parsed);
+      if (!isFirebaseConfigured || !authInstance) {
+        // Mock currentUser for offline/mock testing
+        setCurrentUser({
+          uid: parsed.id,
+          displayName: parsed.username,
+          email: parsed.id.includes('curator') || parsed.username.includes('marpc331') ? 'marpc331@gmail.com' : 'colaborador@playalibre.org'
+        });
+      }
     }
   }, []);
 
@@ -707,7 +289,8 @@ export default function App() {
                 id: user.uid,
                 username: res.data.user.username,
                 avatarUrl: res.data.user.avatarUrl || undefined,
-                reputation: res.data.user.reputation
+                reputation: res.data.user.reputation,
+                bio: res.data.user.bio || undefined
               };
               setUserProfile(profile);
               localStorage.setItem('playalibre_user_profile', JSON.stringify(profile));
@@ -749,7 +332,8 @@ export default function App() {
             id: user.uid,
             username: res.data.user.username,
             avatarUrl: res.data.user.avatarUrl || undefined,
-            reputation: res.data.user.reputation
+            reputation: res.data.user.reputation,
+            bio: res.data.user.bio || undefined
           };
           setUserProfile(profile);
           localStorage.setItem('playalibre_user_profile', JSON.stringify(profile));
@@ -765,6 +349,15 @@ export default function App() {
       setIsProfileSetupOpen(true);
     }
   };
+
+  // Assign curator mode role dynamically based on verified email
+  useEffect(() => {
+    if (currentUser && currentUser.email === 'marpc331@gmail.com') {
+      setIsHighReputationUser(true);
+    } else {
+      setIsHighReputationUser(false);
+    }
+  }, [currentUser]);
 
   // Trigger pending form action after successful auth
   useEffect(() => {
@@ -829,8 +422,8 @@ export default function App() {
     } else {
       // Offline/Mock mode login
       const mockUid = `mock-google-${Date.now()}`;
-      setCurrentUser({ uid: mockUid, displayName: 'Colaborador Google' });
-      setProfileSetupUsername('');
+      setCurrentUser({ uid: mockUid, displayName: 'Colaborador Google', email: 'marpc331@gmail.com' });
+      setProfileSetupUsername('marpc331');
       setProfileSetupAvatarUrl(`preset:${AVATAR_PRESETS[0].emoji}:${AVATAR_PRESETS[0].bg}`);
       setIsProfileSetupOpen(true);
       setIsAuthPromptOpen(false);
@@ -841,7 +434,6 @@ export default function App() {
     e.preventDefault();
     if (!emailAuthEmail.trim() || !emailAuthPassword.trim()) return;
 
-    // Encrypt password with SHA-1 on the client
     const sha1Password = await hashSHA1(emailAuthPassword.trim());
 
     if (isFirebaseConfigured && authInstance) {
@@ -867,7 +459,6 @@ export default function App() {
         let errorMsg = 'Error en la autenticación.';
         if (err.code === 'auth/email-already-in-use') {
           errorMsg = 'El correo ya está registrado.';
-          // Capture the credential to link if they later log in with Google/Apple
           const credential = EmailAuthProvider.credential(emailAuthEmail.trim(), sha1Password);
           setPendingLinkCredential(credential);
           showToast('El correo ya está registrado. Inicia sesión con tu otro proveedor para vincularlos.', 'info');
@@ -881,7 +472,7 @@ export default function App() {
     } else {
       // Offline/Mock mode login
       const mockUid = `mock-email-${Date.now()}`;
-      setCurrentUser({ uid: mockUid, displayName: emailAuthEmail.split('@')[0] });
+      setCurrentUser({ uid: mockUid, displayName: emailAuthEmail.split('@')[0], email: emailAuthEmail.trim() });
       setProfileSetupUsername(emailAuthEmail.split('@')[0]);
       setProfileSetupAvatarUrl(`preset:${AVATAR_PRESETS[3].emoji}:${AVATAR_PRESETS[3].bg}`);
       setIsProfileSetupOpen(true);
@@ -900,6 +491,198 @@ export default function App() {
       localStorage.removeItem('playalibre_user_profile');
     }
     showToast('Sesión cerrada.', 'info');
+  };
+
+  // Helper to map client-side mock ID to real database UUID if needed
+  const resolveBeachId = (id: string): string => {
+    if (id === '00000000-0000-0000-0000-000000000001') {
+      const realBeach = beaches.find(b => b.name === 'Playa Carrizalillo');
+      if (realBeach && realBeach.id !== '00000000-0000-0000-0000-000000000001') return realBeach.id;
+    } else if (id === '00000000-0000-0000-0000-000000000002') {
+      const realBeach = beaches.find(b => b.name === 'Playa Delfines');
+      if (realBeach && realBeach.id !== '00000000-0000-0000-0000-000000000002') return realBeach.id;
+    }
+    return id;
+  };
+
+  // Memoized stats calculation for the selected profile user
+  const userStats = useMemo(() => {
+    if (!selectedProfileId) return { beachesCount: 0, accessesCount: 0, photosCount: 0 };
+    let beachesCount = 0;
+    let accessesCount = 0;
+    let photosCount = 0;
+
+    beaches.forEach((b) => {
+      const isBeachCreator = b.user?.id === selectedProfileId;
+      if (isBeachCreator) {
+        beachesCount++;
+        if (Array.isArray(b.images)) {
+          photosCount += b.images.length;
+        }
+      }
+      if (b.accesses) {
+        b.accesses.forEach((acc) => {
+          const isAccessCreator = acc.user?.id === selectedProfileId;
+          if (isAccessCreator) {
+            accessesCount++;
+            if (Array.isArray(acc.images)) {
+              photosCount += acc.images.length;
+            }
+          }
+        });
+      }
+    });
+
+    return { beachesCount, accessesCount, photosCount };
+  }, [beaches, selectedProfileId]);
+
+  const viewUserProfile = async (userId: string) => {
+    setSelectedProfileId(userId);
+    setSelectedUserProfile(null);
+    setIsProfileViewOpen(true);
+    setIsEditingBio(false);
+    setEditBioText('');
+
+    // If it is the current logged-in user
+    if (userProfile && userProfile.id === userId) {
+      setSelectedUserProfile(userProfile);
+      setEditBioText(userProfile.bio || '');
+      // Fetch latest from DB to ensure bio/reputation is fresh if online
+      if (isOnline && isFirebaseConfigured && dataConnectInstance) {
+        try {
+          const res = await getUser(dataConnectInstance, { id: userId });
+          if (res.data?.user) {
+            const freshProfile = {
+              id: userId,
+              username: res.data.user.username,
+              avatarUrl: res.data.user.avatarUrl || undefined,
+              reputation: res.data.user.reputation,
+              bio: res.data.user.bio || undefined
+            };
+            setUserProfile(freshProfile);
+            localStorage.setItem('playalibre_user_profile', JSON.stringify(freshProfile));
+            setSelectedUserProfile(freshProfile);
+            setEditBioText(res.data.user.bio || '');
+          }
+        } catch (e) {
+          console.error("Error refreshing own profile:", e);
+        }
+      }
+      return;
+    }
+
+    // Try to load user profile from database
+    if (isOnline && isFirebaseConfigured && dataConnectInstance) {
+      try {
+        const res = await getUser(dataConnectInstance, { id: userId });
+        if (res.data?.user) {
+          setSelectedUserProfile({
+            id: userId,
+            username: res.data.user.username,
+            avatarUrl: res.data.user.avatarUrl || undefined,
+            reputation: res.data.user.reputation,
+            bio: res.data.user.bio || undefined
+          });
+          return;
+        }
+      } catch (err) {
+        console.error('Error fetching user profile:', err);
+      }
+    }
+
+    // Fallback: look in offline storage
+    try {
+      const offlineProfile = await getOfflineUserProfile(userId);
+      if (offlineProfile) {
+        setSelectedUserProfile(offlineProfile);
+        return;
+      }
+    } catch (err) {
+      console.error('Error getting offline user profile:', err);
+    }
+
+    // Fallback: traverse existing data in memory
+    let foundUser: any = null;
+    for (const b of beaches) {
+      if (b.user && b.user.id === userId) {
+        foundUser = b.user;
+        break;
+      }
+      if (b.accesses) {
+        for (const acc of b.accesses) {
+          if (acc.user && acc.user.id === userId) {
+            foundUser = acc.user;
+            break;
+          }
+          if (acc.incidentReports) {
+            for (const r of acc.incidentReports) {
+              if (r.user && r.user.id === userId) {
+                foundUser = r.user;
+                break;
+              }
+            }
+          }
+        }
+      }
+      if (foundUser) break;
+    }
+
+    if (!foundUser && selectedBeachComments) {
+      const commentUser = selectedBeachComments.find(c => c.user?.id === userId)?.user;
+      if (commentUser) foundUser = commentUser;
+    }
+
+    if (foundUser) {
+      setSelectedUserProfile({
+        id: userId,
+        username: foundUser.username,
+        avatarUrl: foundUser.avatarUrl || undefined,
+        reputation: foundUser.reputation,
+        bio: ''
+      });
+    } else {
+      setSelectedUserProfile({
+        id: userId,
+        username: 'Colaborador PlayaLibre',
+        avatarUrl: undefined,
+        reputation: 10,
+        bio: ''
+      });
+    }
+  };
+
+  const saveUserBio = async () => {
+    if (!userProfile || !selectedProfileId || userProfile.id !== selectedProfileId) return;
+    
+    const updatedProfile = {
+      ...userProfile,
+      bio: editBioText.trim()
+    };
+
+    if (isOnline && isFirebaseConfigured && dataConnectInstance) {
+      try {
+        await upsertUser(dataConnectInstance, {
+          id: userProfile.id,
+          username: userProfile.username,
+          avatarUrl: userProfile.avatarUrl || null,
+          bio: updatedProfile.bio || null,
+          reputation: userProfile.reputation
+        });
+        showToast('Descripción de perfil guardada exitosamente.', 'success');
+      } catch (err) {
+        console.error('Error saving user bio to database:', err);
+        await saveOfflineUserProfile({ ...updatedProfile, timestamp: Date.now() });
+        showToast('Error de red. Descripción guardada localmente.', 'warn');
+      }
+    } else {
+      await saveOfflineUserProfile({ ...updatedProfile, timestamp: Date.now() });
+      showToast('Descripción guardada localmente (modo offline).', 'success');
+    }
+
+    setUserProfile(updatedProfile);
+    localStorage.setItem('playalibre_user_profile', JSON.stringify(updatedProfile));
+    setSelectedUserProfile(updatedProfile);
+    setIsEditingBio(false);
   };
 
   const submitProfileSetup = async (e: React.FormEvent) => {
@@ -941,48 +724,52 @@ export default function App() {
     setIsProfileSetupOpen(false);
   };
 
-  // Image Upload Event Handlers
-  const handleBeachImagesUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Image Upload Event Handlers with automatic WebP compression & scaling
+  const handleImagesUpload = (e: React.ChangeEvent<HTMLInputElement>, setter: React.Dispatch<React.SetStateAction<string[]>>) => {
     if (!e.target.files) return;
-    const files = Array.from(e.target.files);
-    files.forEach(file => {
+    Array.from(e.target.files).forEach(file => {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          setNewBeachImages(prev => [...prev, reader.result as string]);
-        }
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxDim = 1200;
+          let width = img.width;
+          let height = img.height;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            const webpDataUrl = canvas.toDataURL('image/webp', 0.75);
+            setter(prev => [...prev, webpDataUrl]);
+          } else {
+            setter(prev => [...prev, event.target?.result as string]);
+          }
+        };
+        img.src = event.target?.result as string;
       };
       reader.readAsDataURL(file);
     });
   };
 
-  const handleAccessImagesUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-    const files = Array.from(e.target.files);
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          setNewAccessImages(prev => [...prev, reader.result as string]);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
-  };
+  const handleBeachImagesUpload = (e: React.ChangeEvent<HTMLInputElement>) => handleImagesUpload(e, setNewBeachImages);
+  const handleAccessImagesUpload = (e: React.ChangeEvent<HTMLInputElement>) => handleImagesUpload(e, setNewAccessImages);
 
   // Comments Loader
   const loadComments = async (beachId: string) => {
     if (isOnline && isFirebaseConfigured && dataConnectInstance) {
       try {
-        let targetBeachId = beachId;
-        if (targetBeachId === '00000000-0000-0000-0000-000000000001') {
-          const realBeach = beaches.find(b => b.name === 'Playa Carrizalillo');
-          if (realBeach && realBeach.id !== '00000000-0000-0000-0000-000000000001') targetBeachId = realBeach.id;
-        } else if (targetBeachId === '00000000-0000-0000-0000-000000000002') {
-          const realBeach = beaches.find(b => b.name === 'Playa Delfines');
-          if (realBeach && realBeach.id !== '00000000-0000-0000-0000-000000000002') targetBeachId = realBeach.id;
-        }
-
+        const targetBeachId = resolveBeachId(beachId);
         const res = await getCommentsForBeach(dataConnectInstance, { beachId: targetBeachId });
         if (res.data?.comments) {
           setSelectedBeachComments(res.data.comments);
@@ -1023,14 +810,7 @@ export default function App() {
 
     if (isOnline && isFirebaseConfigured && dataConnectInstance) {
       try {
-        let targetBeachId = selectedBeachId;
-        if (targetBeachId === '00000000-0000-0000-0000-000000000001') {
-          const realBeach = beaches.find(b => b.name === 'Playa Carrizalillo');
-          if (realBeach && realBeach.id !== '00000000-0000-0000-0000-000000000001') targetBeachId = realBeach.id;
-        } else if (targetBeachId === '00000000-0000-0000-0000-000000000002') {
-          const realBeach = beaches.find(b => b.name === 'Playa Delfines');
-          if (realBeach && realBeach.id !== '00000000-0000-0000-0000-000000000002') targetBeachId = realBeach.id;
-        }
+        const targetBeachId = resolveBeachId(selectedBeachId);
 
         await createComment(dataConnectInstance, {
           beachId: targetBeachId,
@@ -1066,53 +846,10 @@ export default function App() {
     setNewCommentText('');
   };
 
-  // Timeline Data Generator
-  const computeTimelineData = (beach: Beach) => {
-    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-    const data: Record<string, { month: string; illegalFees: number; insecurity: number; blockages: number; other: number; sortKey: number }> = {};
-    
-    // Last 6 months
-    const now = new Date();
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const mName = months[d.getMonth()];
-      const key = `${d.getFullYear()}-${String(d.getMonth()).padStart(2, '0')}`;
-      data[key] = {
-        month: mName,
-        illegalFees: 0,
-        insecurity: 0,
-        blockages: 0,
-        other: 0,
-        sortKey: d.getTime()
-      };
-    }
-
-    // Add incidents
-    beach.accesses.forEach((acc) => {
-      acc.incidentReports.forEach((r) => {
-        const rDate = new Date(r.timestamp);
-        const rKey = `${rDate.getFullYear()}-${String(rDate.getMonth()).padStart(2, '0')}`;
-        if (data[rKey]) {
-          if (r.hasIllegalFee) {
-            data[rKey].illegalFees += 1;
-          } else if (r.blockerType === 'Insecurity') {
-            data[rKey].insecurity += 1;
-          } else if (['Hotel', 'Condo', 'Restaurant', 'Beach Club', 'Private Property'].includes(r.blockerType)) {
-            data[rKey].blockages += 1;
-          } else {
-            data[rKey].other += 1;
-          }
-        }
-      });
-    });
-
-    return Object.values(data).sort((a, b) => a.sortKey - b.sortKey);
-  };
-
-  // Live Real-Time database sync subscriptions (Firebase SQL Connect)
+  // Live Real-Time database sync subscriptions
   useEffect(() => {
     if (!isFirebaseConfigured || !dataConnectInstance) {
-      console.log('Running in local mock mode (configure VITE_FIREBASE credentials in .env to go live).');
+      console.log('Running in local mock mode.');
       return;
     }
 
@@ -1179,12 +916,11 @@ export default function App() {
             }
           }
         } else {
-          // Map backend rows to client models
           const list = snapshot.data.beaches.map((b) => mapDbBeachToFrontend(b));
           setBeaches(list);
         }
       } catch (err) {
-        console.error('Failed to process real-time SQL Connect subscription snapshot:', err);
+        console.error('Failed to process real-time subscription snapshot:', err);
       }
     });
 
@@ -1366,7 +1102,7 @@ export default function App() {
     setTimeout(() => setToastMessage(null), 4000);
   };
 
-  // Upvoting or downvoting a specific report (curation curation threshold x3 multiplier)
+  // Upvoting or downvoting a specific report
   const handleReportVote = async (accessId: string, reportId: string, diff: number) => {
     const power = isHighReputationUser ? 3 : 1;
     
@@ -1596,7 +1332,7 @@ export default function App() {
     setIsReportOpen(false);
   };
 
-  // Submit a new beach (polygon territory)
+  // Submit a new beach
   const submitNewBeach = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userProfile) {
@@ -1682,7 +1418,7 @@ export default function App() {
     setIsNewBeachOpen(false);
   };
 
-  // Submit a new access point (and optional walking path) linked to a beach
+  // Submit a new access point linked to a beach
   const submitNewAccess = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userProfile) {
@@ -1730,15 +1466,7 @@ export default function App() {
     if (isOnline) {
       try {
         if (isFirebaseConfigured && dataConnectInstance) {
-          // Map client-side mock ID to real database UUID if needed
-          let targetBeachId = newAccessBeachId;
-          if (targetBeachId === '00000000-0000-0000-0000-000000000001') {
-            const realBeach = beaches.find(b => b.name === 'Playa Carrizalillo');
-            if (realBeach && realBeach.id !== '00000000-0000-0000-0000-000000000001') targetBeachId = realBeach.id;
-          } else if (targetBeachId === '00000000-0000-0000-0000-000000000002') {
-            const realBeach = beaches.find(b => b.name === 'Playa Delfines');
-            if (realBeach && realBeach.id !== '00000000-0000-0000-0000-000000000002') targetBeachId = realBeach.id;
-          }
+          const targetBeachId = resolveBeachId(newAccessBeachId);
 
           const res = await createAccess(dataConnectInstance, {
             beachId: targetBeachId,
@@ -1946,7 +1674,11 @@ export default function App() {
           <div className="pointer-events-auto flex items-center justify-between px-6 py-3 rounded-[16px] border border-black/10 bg-white/30 backdrop-blur-[50px] shadow-[inset_0_4px_4px_rgba(255,255,255,0.25)]">
             
             {/* Logo */}
-            <div className="flex items-center gap-2.5 cursor-pointer font-fustat font-bold text-[22px] tracking-tight text-[#1a1a1a]" onClick={() => { setSelectedBeachId(null); setSelectedAccessId(null); }}>
+            <div className="flex items-center gap-2.5 cursor-pointer font-fustat font-bold text-[22px] tracking-tight text-[#1a1a1a]" onClick={() => { 
+              setSelectedBeachId(null); 
+              setSelectedAccessId(null); 
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}>
               <div className="w-6 h-6 rounded-md bg-[#0871E7] flex items-center justify-center text-white shadow-sm font-sans font-black text-[10px] tracking-tighter">
                 PL
               </div>
@@ -1969,7 +1701,7 @@ export default function App() {
               >
                 Explorar accesos
               </a>
-               <button 
+              <button 
                 onClick={() => {
                   if (!userProfile) {
                     setPendingAuthAction('beach');
@@ -2005,32 +1737,27 @@ export default function App() {
             <div className="flex items-center gap-4 pointer-events-auto">
               {userProfile ? (
                 <div className="flex items-center gap-3 bg-black/[0.04] pl-2.5 pr-3 py-1 rounded-full border border-black/5">
-                  <UserAvatar avatarUrl={userProfile.avatarUrl} username={userProfile.username} size="sm" />
-                  <div className="flex flex-col text-left select-none leading-none">
-                    <span className="text-[11px] font-bold text-gray-800 tracking-tight">{userProfile.username}</span>
-                    <span className="text-[8.5px] font-semibold text-[#0871E7] mt-0.5">★ {userProfile.reputation} karma</span>
+                  <div 
+                    onClick={() => viewUserProfile(userProfile.id)}
+                    className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-all select-none"
+                    title="Ver mi perfil"
+                  >
+                    <UserAvatar avatarUrl={userProfile.avatarUrl} username={userProfile.username} size="sm" />
+                    <div className="flex flex-col text-left leading-none">
+                      <span className="text-[11px] font-bold text-gray-800 tracking-tight">{userProfile.username}</span>
+                      <span className="text-[8.5px] font-semibold text-[#0871E7] mt-0.5">★ {userProfile.reputation} karma</span>
+                    </div>
                   </div>
 
-                  {/* Curator Toggle only if user has profile */}
-                  <button 
-                    onClick={() => {
-                      setIsHighReputationUser(!isHighReputationUser);
-                      showToast(
-                        !isHighReputationUser
-                          ? 'Modo curador activado. Tienes poderes de moderación de accesos.'
-                          : 'Modo turista activado. Tus reportes requerirán moderación colectiva.',
-                        'info'
-                      );
-                    }}
-                    className={`p-1 rounded-full border transition-all duration-300 ${
-                      isHighReputationUser
-                        ? 'bg-amber-500/10 border-amber-500/30 text-amber-600'
-                        : 'bg-white/10 border-black/10 text-gray-400 hover:text-gray-600'
-                    }`}
-                    title={isHighReputationUser ? 'Desactivar modo curador' : 'Activar modo curador'}
-                  >
-                    <Award size={13} className={isHighReputationUser ? 'animate-pulse' : ''} />
-                  </button>
+                  {isHighReputationUser && (
+                    <div 
+                      className="flex items-center gap-0.5 bg-amber-500/10 border border-amber-500/30 text-amber-600 rounded-full px-2 py-0.5 text-[8px] font-bold select-none"
+                      title="Curador de la comunidad"
+                    >
+                      <Award size={10} className="animate-pulse" />
+                      <span>Curador</span>
+                    </div>
+                  )}
 
                   <button
                     onClick={handleLogout}
@@ -2119,7 +1846,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* Footer Coastal States (only 17 coastal states in Mexico) */}
+        {/* Footer Coastal States */}
         <div className="relative z-20 w-full max-w-5xl mx-auto px-6 border-t border-black/5 pt-10 pb-8 mt-auto flex flex-col gap-5 items-center">
           <p className="text-[11px] sm:text-[12px] font-sans font-medium text-gray-400 uppercase tracking-widest text-center">
             Monitoreando la costa mexicana en sus 17 estados costeros
@@ -2167,8 +1894,8 @@ export default function App() {
           </div>
 
           <h2 className="text-gray-900 font-medium leading-[1.12] tracking-[-0.02em] mb-12 sm:mb-16 lg:mb-28 max-w-5xl" style={{ fontSize: 'clamp(1.5rem, 4.5vw, 3.2rem)' }}>
-            Organización cívica colectiva, garantizando <br className="hidden sm:block" />
-            el libre tránsito en las costas del país.
+            Organización colectiva, garantizando <br className="hidden sm:block" />
+            el libre tránsito en las costas de México.
           </h2>
 
           <div className="lg:hidden flex flex-col gap-8">
@@ -2335,376 +2062,32 @@ export default function App() {
 
           <div className="flex flex-col lg:flex-row gap-6 items-stretch min-h-[600px]">
             
-            {/* Sidebar list */}
-            <div className={`w-full lg:w-[400px] flex flex-col gap-4 ${
-              mobileSection === 'map' ? 'hidden lg:flex' : 'flex'
-            }`}>
-              
-              {selectedBeach ? (
-                <div className="flex-1 flex flex-col bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden p-5">
-                  <div className="flex items-center gap-2 mb-4 border-b border-gray-100 pb-3">
-                    <button
-                      onClick={() => {
-                        if (selectedAccessId) {
-                          setSelectedAccessId(null);
-                        } else {
-                          setSelectedBeachId(null);
-                        }
-                      }}
-                      className="p-1.5 rounded-lg bg-gray-100 text-gray-500 hover:text-gray-900 transition-colors"
-                      title="Volver"
-                    >
-                      <ChevronLeft size={16} />
-                    </button>
-                    <div>
-                      <span className="text-[10px] font-bold text-[#0871E7] uppercase tracking-widest leading-none">{selectedBeach.state}</span>
-                      <h3 className="font-bold text-sm text-gray-900 leading-tight mt-0.5">{selectedBeach.name}</h3>
-                    </div>
-                  </div>
-
-                  {selectedAccess ? (
-                    <div className="flex-1 flex flex-col gap-4 overflow-y-auto pr-1 text-xs">
-                      
-                      {/* Access images preview if exists */}
-                      {selectedAccess.images && selectedAccess.images.length > 0 && (
-                        <div className="flex gap-1.5 overflow-x-auto py-1">
-                          {selectedAccess.images.map((img, idx) => (
-                            <img
-                              key={idx}
-                              src={img}
-                              onClick={() => setLightboxImage(img)}
-                              className="w-14 h-14 object-cover rounded-lg border border-gray-250 cursor-pointer hover:opacity-90 flex-shrink-0"
-                            />
-                          ))}
-                        </div>
-                      )}
-
-                      <div className="flex items-center justify-between border-b border-dashed border-gray-200 pb-2">
-                        <span className="font-bold text-gray-800">Ubicación del acceso:</span>
-                        <span className="text-[10px] text-gray-500 font-mono">
-                          [{selectedAccess.latitude.toFixed(4)}, {selectedAccess.longitude.toFixed(4)}]
-                        </span>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-gray-800">Nombre del acceso:</span>
-                        <span className="text-gray-650 font-medium">{selectedAccess.name}</span>
-                      </div>
-
-                      {selectedAccess.user && (
-                        <div className="flex justify-between items-center text-[10px] bg-gray-50 p-2 rounded-lg border border-gray-150">
-                          <span className="text-gray-500 font-medium">Registrado por:</span>
-                          <span className="font-bold text-gray-800 flex items-center gap-1">
-                            {selectedAccess.user.username}
-                            <span className="text-[#0871E7]">★ {selectedAccess.user.reputation}</span>
-                          </span>
-                        </div>
-                      )}
-
-                      <div className="p-3.5 rounded-xl border flex flex-col gap-2.5 bg-gray-50 border-gray-200">
-                        <div className="flex justify-between items-center">
-                          <span className="font-semibold text-gray-700">Estado del acceso:</span>
-                          <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${
-                            selectedAccess.blockerType !== 'None' ? 'bg-red-100 text-red-800 border border-red-200' : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                          }`}>
-                            {selectedAccess.blockerType !== 'None' ? 'Obstruido' : 'Acceso libre'}
-                          </span>
-                        </div>
-
-                        {selectedAccess.blockerType !== 'None' && (
-                          <div className="border-t border-gray-200 pt-2.5 mt-1 space-y-1.5">
-                            <div className="flex justify-between">
-                              <span className="text-gray-500">Bloqueo por:</span>
-                              <span className="font-semibold text-gray-800">{selectedAccess.blockerType}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-500">Responsable:</span>
-                              <span className="font-semibold text-gray-800">{selectedAccess.blockerName}</span>
-                            </div>
-                            {selectedAccess.illegalFeeAmount > 0 && (
-                              <div className="flex justify-between text-red-650 font-bold">
-                                <span>Cobro reportado:</span>
-                                <span>${selectedAccess.illegalFeeAmount} MXN</span>
-                              </div>
-                            )}
-                            <p className="text-[10px] text-gray-650 bg-red-50/50 p-2 rounded-lg border border-red-100 mt-1 italic">
-                              "{selectedAccess.blockerDescription}"
-                            </p>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Walking path */}
-                      {selectedAccess.trailGeometry && selectedAccess.trailGeometry.length > 0 && (
-                        <div className="p-3.5 rounded-xl border bg-blue-50/30 border-blue-100 flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                            <MapPin size={14} />
-                          </div>
-                          <div>
-                            <h4 className="font-semibold text-gray-800">Sendero trazado</h4>
-                            <p className="text-[10px] text-gray-500 mt-0.5">El camino a pie está trazado en el mapa interactivo.</p>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Services checklist */}
-                      <div>
-                        <h4 className="font-bold text-gray-800 mb-1.5">Servicios en este acceso</h4>
-                        <div className="grid grid-cols-2 gap-1.5 bg-gray-50 p-3 rounded-xl border border-gray-150 text-[10px]">
-                          <span className={`flex items-center gap-1 ${selectedAccess.parking ? 'text-emerald-700 font-semibold' : 'text-gray-400 line-through'}`}>
-                            Estacionamiento
-                          </span>
-                          <span className={`flex items-center gap-1 ${selectedAccess.security ? 'text-emerald-700 font-semibold' : 'text-gray-400 line-through'}`}>
-                            Seguridad
-                          </span>
-                          <span className={`flex items-center gap-1 ${selectedAccess.showers ? 'text-emerald-700 font-semibold' : 'text-gray-400 line-through'}`}>
-                            Regaderas
-                          </span>
-                          <span className={`flex items-center gap-1 ${selectedAccess.pets ? 'text-emerald-700 font-semibold' : 'text-gray-400 line-through'}`}>
-                            Mascotas
-                          </span>
-                          <span className={`flex items-center gap-1 ${selectedAccess.ramps ? 'text-emerald-700 font-semibold' : 'text-gray-400 line-through'}`}>
-                            Rampas (a11y)
-                          </span>
-                          <span className={`flex items-center gap-1 ${selectedAccess.wheelchair ? 'text-emerald-700 font-semibold' : 'text-gray-400 line-through'}`}>
-                            Silla de ruedas
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Curator controls */}
-                      {isHighReputationUser && (
-                        <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 mt-2">
-                          <h4 className="font-bold text-amber-900 mb-1 flex items-center gap-1">
-                            <span>Herramientas de curaduría</span>
-                          </h4>
-                          <p className="text-[10px] text-amber-800 mb-3">Como curador, puedes resolver conflictos reportados o certificar el acceso público.</p>
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => handleCurationVerify(selectedAccess.id, 'resolve_conflict')}
-                              className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[10px] font-bold text-center"
-                            >
-                              Resolver conflicto
-                            </button>
-                            <button
-                              onClick={() => handleCurationVerify(selectedAccess.id, 'verify_public')}
-                              className="flex-1 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-[10px] font-bold text-center"
-                            >
-                              Certificar acceso
-                            </button>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* incident reports */}
-                      <div className="border-t border-gray-150 pt-4 mt-2">
-                        <div className="flex items-center justify-between mb-3">
-                          <h4 className="font-bold text-gray-800">Reportes de la comunidad</h4>
-                          <button
-                            onClick={() => setIsReportOpen(true)}
-                            className="text-[10px] text-[#0871E7] hover:underline font-semibold"
-                          >
-                            + Reportar anomalía
-                          </button>
-                        </div>
-
-                        <div className="space-y-2.5">
-                          {selectedAccess.incidentReports.length > 0 ? (
-                            selectedAccess.incidentReports.map((report) => (
-                              <div key={report.id} className="p-3 border border-gray-200 rounded-xl bg-gray-50/50 flex flex-col gap-1.5 text-xs">
-                                <div className="flex justify-between items-start">
-                                  <span className="font-bold text-gray-800 text-[10px] flex items-center gap-1">
-                                    {report.reporterName}
-                                    {report.user && (
-                                      <span className="text-[#0871E7] font-semibold text-[8px]">★ {report.user.reputation}</span>
-                                    )}
-                                  </span>
-                                  <span className="text-[8.5px] text-gray-400">
-                                    {new Date(report.timestamp).toLocaleDateString()}
-                                  </span>
-                                </div>
-                                <p className="text-gray-650 leading-snug">{report.description}</p>
-                                {report.hasIllegalFee && (
-                                  <span className="text-red-650 font-bold text-[9.5px]">Cobro forzado: ${report.feeAmount} MXN</span>
-                                )}
-                                
-                                <div className="flex justify-between items-center pt-1.5 border-t border-dashed border-gray-200 mt-1">
-                                  <span className="text-[9px] text-gray-500">Puntaje cívico: <strong>{report.score}</strong></span>
-                                  <div className="flex gap-1.5">
-                                    <button
-                                      onClick={() => handleReportVote(selectedAccess.id, report.id, 1)}
-                                      className="p-1 rounded bg-gray-105 hover:bg-gray-200 text-emerald-600"
-                                      title="Votar a favor"
-                                    >
-                                      <ThumbsUp size={11} />
-                                    </button>
-                                    <button
-                                      onClick={() => handleReportVote(selectedAccess.id, report.id, -1)}
-                                      className="p-1 rounded bg-gray-105 hover:bg-gray-200 text-red-600"
-                                      title="Reportar información incorrecta"
-                                    >
-                                      <ThumbsDown size={11} />
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                            ))
-                          ) : (
-                            <div className="py-6 text-center text-gray-450 bg-gray-50 border border-dashed border-gray-200 rounded-lg text-[10px]">
-                              No hay anomalías reportadas para este acceso.
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    /* Beach Details View button and list of accesses */
-                    <div className="flex-1 flex flex-col gap-4 overflow-y-auto pr-1 text-xs">
-                      
-                      <button
-                        onClick={() => {
-                          setBeachDetailOpen(true);
-                          loadComments(selectedBeach.id);
-                        }}
-                        className="w-full py-3 bg-[#0871E7] hover:bg-[#0762cb] text-white rounded-xl font-bold text-xs transition-all shadow-sm flex items-center justify-center gap-2 mb-2"
-                      >
-                        <Info size={14} />
-                        <span>Ver ficha de playa y comentarios</span>
-                      </button>
-
-                      {selectedBeach.images && selectedBeach.images.length > 0 && (
-                        <div className="flex gap-1.5 overflow-x-auto py-1">
-                          {selectedBeach.images.map((img, idx) => (
-                            <img
-                              key={idx}
-                              src={img}
-                              onClick={() => setLightboxImage(img)}
-                              className="w-14 h-14 object-cover rounded-lg border border-gray-250 cursor-pointer hover:opacity-90 flex-shrink-0"
-                            />
-                          ))}
-                        </div>
-                      )}
-
-                      <div className="flex justify-between items-center border-b border-gray-150 pb-2">
-                        <span className="font-bold text-gray-800">Coordenadas de la playa:</span>
-                        <span className="text-[10px] text-gray-500 font-mono">
-                          [{selectedBeach.latitude.toFixed(4)}, {selectedBeach.longitude.toFixed(4)}]
-                        </span>
-                      </div>
-
-                      {selectedBeach.user && (
-                        <div className="flex justify-between items-center text-[10px] bg-gray-50 p-2 rounded-lg border border-gray-150">
-                          <span className="text-gray-500 font-medium">Registrada por:</span>
-                          <span className="font-bold text-gray-800 flex items-center gap-1">
-                            {selectedBeach.user.username}
-                            <span className="text-[#0871E7]">★ {selectedBeach.user.reputation}</span>
-                          </span>
-                        </div>
-                      )}
-
-                      <div>
-                        <h4 className="font-bold text-gray-900 mb-2">Accesos peatonales registrados</h4>
-                        
-                        {selectedBeach.accesses && selectedBeach.accesses.length > 0 ? (
-                          <div className="space-y-2">
-                            {selectedBeach.accesses.map((acc) => {
-                              const isBlocked = acc.blockerType !== 'None';
-                              return (
-                                <div
-                                  key={acc.id}
-                                  onClick={() => setSelectedAccessId(acc.id)}
-                                  className="p-3 border border-gray-200 rounded-xl hover:border-[#0871E7] cursor-pointer bg-white transition-all hover:shadow-sm flex justify-between items-center"
-                                >
-                                  <div>
-                                    <h5 className="font-bold text-gray-800 text-[11.5px]">{acc.name}</h5>
-                                    <span className="text-[9px] text-gray-400 font-mono mt-0.5 block">
-                                      [{acc.latitude.toFixed(4)}, {acc.longitude.toFixed(4)}]
-                                    </span>
-                                  </div>
-                                  <span className={`px-2 py-0.5 rounded text-[8.5px] font-bold uppercase text-white ${
-                                    isBlocked ? 'bg-red-500' : 'bg-emerald-500'
-                                  }`}>
-                                    {isBlocked ? 'Bloqueado' : 'Libre'}
-                                  </span>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        ) : (
-                          <div className="py-8 text-center text-gray-400 bg-gray-50 border border-dashed border-gray-250 rounded-xl text-[10px] space-y-2">
-                            <p>No hay accesos peatonales registrados para esta playa pública.</p>
-                            <button
-                              onClick={() => {
-                                setNewAccessBeachId(selectedBeach.id);
-                                setIsNewAccessOpen(true);
-                              }}
-                              className="px-3 py-1.5 bg-gray-905 text-white rounded-lg font-bold text-[9.5px]"
-                            >
-                              Registrar acceso
-                            </button>
-                          </div>
-                        )}
-                      </div>
-
-                    </div>
-                  )}
-
-                </div>
-              ) : (
-                /* Playas registradas list */
-                <div className="flex-1 flex flex-col bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden p-5 max-h-[600px] overflow-y-auto">
-                  <div className="mb-4">
-                    <h3 className="font-bold text-gray-900 text-sm">Playas registradas</h3>
-                    <p className="text-[10px] text-gray-500 mt-0.5">Selecciona una playa para consultar sus accesos</p>
-                  </div>
-
-                  <div className="space-y-2 flex-1 overflow-y-auto pr-1">
-                    {filteredBeaches.length > 0 ? (
-                      filteredBeaches.map((beach) => {
-                        const totalAccesses = beach.accesses.length;
-                        const blockedAccesses = beach.accesses.filter(a => a.blockerType !== 'None').length;
-                        const hasConflict = blockedAccesses > 0;
-
-                        return (
-                          <div
-                            key={beach.id}
-                            onClick={() => {
-                              setSelectedBeachId(beach.id);
-                              setSelectedAccessId(null);
-                              setMapCenter([beach.latitude, beach.longitude]);
-                              setMapZoom(15);
-                              setBeachDetailOpen(true);
-                              setVisibleImagesLimit(4);
-                              loadComments(beach.id);
-                            }}
-                            className="p-3 border border-gray-150 rounded-xl hover:border-[#0871E7] cursor-pointer bg-white transition-all hover:shadow-sm flex items-center justify-between"
-                          >
-                            <div className="flex flex-col gap-0.5">
-                              <span className="text-[9px] text-[#0871E7] uppercase font-bold tracking-wide">{beach.state}</span>
-                              <h4 className="font-bold text-gray-905 text-[12.5px] leading-tight">{beach.name}</h4>
-                              <span className="text-[9.5px] text-gray-500 mt-1">
-                                {totalAccesses} {totalAccesses === 1 ? 'acceso público' : 'accesos públicos'}
-                              </span>
-                            </div>
-
-                            <span className={`px-2 py-0.5 rounded text-[8.5px] font-bold uppercase text-white ${
-                              hasConflict ? 'bg-red-500' : 'bg-emerald-500'
-                            }`}>
-                              {hasConflict ? 'Con conflicto' : 'Libre'}
-                            </span>
-                          </div>
-                        );
-                      })
-                    ) : (
-                      <div className="py-12 text-center text-gray-400 bg-gray-50 border border-dashed border-gray-200 rounded-xl text-xs">
-                        No hay playas registradas que coincidan con la búsqueda.
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-            </div>
+            {/* Sidebar list panel */}
+            <SidebarPanel
+              selectedBeach={selectedBeach}
+              selectedAccess={selectedAccess}
+              selectedBeachId={selectedBeachId}
+              setSelectedBeachId={setSelectedBeachId}
+              selectedAccessId={selectedAccessId}
+              setSelectedAccessId={setSelectedAccessId}
+              beaches={beaches}
+              filteredBeaches={filteredBeaches}
+              setMapCenter={setMapCenter}
+              setMapZoom={setMapZoom}
+              setBeachDetailOpen={setBeachDetailOpen}
+              setVisibleImagesLimit={setVisibleImagesLimit}
+              loadComments={loadComments}
+              userProfile={userProfile}
+              isHighReputationUser={isHighReputationUser}
+              handleCurationVerify={handleCurationVerify}
+              setIsReportOpen={setIsReportOpen}
+              handleReportVote={handleReportVote}
+              setIsNewAccessOpen={setIsNewAccessOpen}
+              setNewAccessBeachId={setNewAccessBeachId}
+              viewUserProfile={viewUserProfile}
+              setLightboxImage={setLightboxImage}
+              mobileSection={mobileSection}
+            />
 
             {/* Map pane */}
             <div className={`flex-1 relative flex flex-col rounded-2xl bg-[#151c14] border border-gray-200 overflow-hidden shadow ${
@@ -2746,48 +2129,39 @@ export default function App() {
                     </p>
                     {drawMode === 'beach' && (
                       <div className="flex gap-1.5 items-center justify-between mt-1">
-                        <span className="text-gray-500">{drawingPoints.length} vértices</span>
-                        <div className="flex gap-1">
-                          <button
-                            onClick={() => {
-                              setDrawMode(null);
-                              setIsNewBeachOpen(true);
-                              setIsFormMinimized(false);
-                            }}
-                            className="px-2 py-1 bg-emerald-600 text-white rounded text-[8.5px] font-bold uppercase"
-                          >
-                            Listo
-                          </button>
-                          <button
-                            onClick={() => setDrawingPoints([])}
-                            className="px-2 py-1 bg-gray-800 text-gray-300 rounded text-[8.5px] font-bold uppercase"
-                          >
-                            Limpiar
-                          </button>
-                        </div>
+                        <button
+                          onClick={() => submitNewBeach({ preventDefault: () => {} } as any)}
+                          disabled={drawingPoints.length < 3}
+                          className="px-2.5 py-1 bg-emerald-600 text-white rounded text-[8.5px] font-bold uppercase disabled:opacity-50"
+                        >
+                          Listo
+                        </button>
+                        <button
+                          onClick={() => setDrawingPoints([])}
+                          className="px-2 py-1 bg-gray-800 text-gray-300 rounded text-[8.5px] font-bold uppercase"
+                        >
+                          Limpiar
+                        </button>
                       </div>
                     )}
                     {drawMode === 'trail' && (
                       <div className="flex gap-1.5 items-center justify-between mt-1">
-                        <span className="text-gray-500">{trailDrawingPoints.length} puntos</span>
-                        <div className="flex gap-1">
-                          <button
-                            onClick={() => {
-                              setDrawMode(null);
-                              setIsNewAccessOpen(true);
-                              setIsFormMinimized(false);
-                            }}
-                            className="px-2 py-1 bg-[#319AFF] text-white rounded text-[8.5px] font-bold uppercase"
-                          >
-                            Listo
-                          </button>
-                          <button
-                            onClick={() => setTrailDrawingPoints([])}
-                            className="px-2 py-1 bg-gray-800 text-gray-300 rounded text-[8.5px] font-bold uppercase"
-                          >
-                            Limpiar
-                          </button>
-                        </div>
+                        <button
+                          onClick={() => {
+                            setIsNewAccessOpen(true);
+                            setIsFormMinimized(false);
+                            setDrawMode(null);
+                          }}
+                          className="px-2.5 py-1 bg-blue-600 text-white rounded text-[8.5px] font-bold uppercase"
+                        >
+                          Guardar
+                        </button>
+                        <button
+                          onClick={() => setTrailDrawingPoints([])}
+                          className="px-2 py-1 bg-gray-800 text-gray-300 rounded text-[8.5px] font-bold uppercase"
+                        >
+                          Limpiar
+                        </button>
                       </div>
                     )}
                   </div>
@@ -2868,7 +2242,7 @@ export default function App() {
                         >
                           <Popup>
                             <div className="text-gray-900 font-sans p-1 leading-normal text-xs">
-                              <h4 className="font-bold text-gray-950 leading-tight">{acc.name}</h4>
+                              <h4 className="font-bold text-gray-955 leading-tight">{acc.name}</h4>
                               <p className="text-[10px] text-gray-500 font-medium">Playa: {b.name}</p>
                               <span className={`text-[8.5px] px-1.5 py-0.5 rounded font-bold uppercase mt-1 inline-block text-white ${
                                 isBlocked ? 'bg-red-500' : 'bg-emerald-500'
@@ -3025,1085 +2399,201 @@ export default function App() {
             <span className="text-xs text-white/80 font-semibold tracking-tight">PlayaLibre Beta</span>
           </div>
           <p className="text-xs">
-            © 2026 PlayaLibre. Ley General de Bienes Nacionales. Libre tránsito costero.
+            © 2026 PlayaLibre.
           </p>
         </div>
       </footer>
 
-      {/* MODAL: ADD NEW BEACH */}
-      {isNewBeachOpen && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-          <div className="relative w-full max-w-md bg-[#EFEFEF] border border-gray-300 rounded-3xl overflow-hidden shadow-2xl p-5 sm:p-6 max-h-[85vh] overflow-y-auto">
-            
-            <div className="flex items-center justify-between pb-3 border-b border-gray-250 mb-4">
-              <div className="text-left">
-                <h3 className="text-base font-bold text-gray-905">Registrar playa</h3>
-                <p className="text-[9.5px] text-gray-500 mt-0.5">Define los límites y demarca el territorio de la playa pública</p>
-              </div>
-              <button
-                onClick={() => setIsNewBeachOpen(false)}
-                className="p-1.5 rounded-lg bg-gray-200/60 text-gray-500 hover:text-gray-900"
-              >
-                <X size={16} />
-              </button>
-            </div>
+      {/* MODALS SECTION */}
+      
+      {/* Lightbox view */}
+      <LightboxModal image={lightboxImage} onClose={() => setLightboxImage(null)} />
 
-            <form onSubmit={submitNewBeach} className="space-y-4 text-xs text-left">
-              <div>
-                <label className="block text-[9px] font-bold uppercase text-gray-600 mb-1">Nombre oficial de la playa *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ej. Playa Carrizalillo"
-                  value={newBeachName}
-                  onChange={(e) => setNewBeachName(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-white border border-gray-300 text-gray-905 placeholder-gray-400 outline-none"
-                />
-              </div>
+      {/* Auth Prompt Modal */}
+      <AuthPromptModal
+        isOpen={isAuthPromptOpen}
+        onClose={() => {
+          setIsAuthPromptOpen(false);
+          setPendingAuthAction(null);
+          setIsEmailAuthOpen(false);
+          setEmailAuthEmail('');
+          setEmailAuthPassword('');
+        }}
+        isEmailAuthOpen={isEmailAuthOpen}
+        setIsEmailAuthOpen={setIsEmailAuthOpen}
+        emailAuthMode={emailAuthMode}
+        setEmailAuthMode={setEmailAuthMode}
+        emailAuthEmail={emailAuthEmail}
+        setEmailAuthEmail={setEmailAuthEmail}
+        emailAuthPassword={emailAuthPassword}
+        setEmailAuthPassword={setEmailAuthPassword}
+        handleLogin={handleLogin}
+        handleEmailPasswordSubmit={handleEmailPasswordSubmit}
+      />
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[9px] font-bold uppercase text-gray-600 mb-1">Estado</label>
-                  <select
-                    value={newBeachState}
-                    onChange={(e) => {
-                      const stateName = e.target.value;
-                      setNewBeachState(stateName);
-                      const coords = STATE_COASTAL_COORDINATES[stateName];
-                      if (coords) {
-                        setMapCenter(coords);
-                        setMapZoom(11);
-                      }
-                    }}
-                    className="w-full px-3 py-2.5 rounded-xl bg-white border border-gray-300 text-gray-905 outline-none cursor-pointer"
-                  >
-                    {MEXICAN_STATES.map((state) => (
-                      <option key={state} value={state}>
-                        {state}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex items-end">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsNewBeachOpen(false);
-                      setIsFormMinimized(true);
-                      setDrawMode('beach');
-                      setDrawingPoints([]);
-                      const el = document.getElementById('explorer-section');
-                      if (el) el.scrollIntoView({ behavior: 'smooth' });
-                    }}
-                    className="w-full py-2.5 bg-gray-200 hover:bg-gray-300/80 border border-gray-350 text-gray-800 rounded-xl text-center font-bold"
-                  >
-                    Delinear límites
-                  </button>
-                </div>
-              </div>
+      {/* Email verification modal */}
+      <EmailVerificationPendingModal
+        isOpen={isEmailVerificationPending}
+        currentUser={currentUser}
+        emailAuthEmail={emailAuthEmail}
+        onVerifyCheck={async () => {
+          if (authInstance?.currentUser) {
+            await authInstance.currentUser.reload();
+            if (authInstance.currentUser.emailVerified) {
+              showToast('Correo verificado exitosamente.', 'success');
+              await handleSuccessfulVerification();
+            } else {
+              showToast('El correo aún no ha sido verificado. Por favor, haz clic en el enlace que te enviamos.', 'warn');
+            }
+          }
+        }}
+        onResendEmail={async () => {
+          if (authInstance?.currentUser) {
+            try {
+              await sendEmailVerification(authInstance.currentUser);
+              showToast('Correo de verificación reenviado.', 'success');
+            } catch (err) {
+              console.error('Error resending email:', err);
+              showToast('No se pudo reenviar el correo. Inténtalo más tarde.', 'warn');
+            }
+          }
+        }}
+        onCancel={async () => {
+          if (authInstance) {
+            await signOut(authInstance);
+          }
+          setIsEmailVerificationPending(false);
+        }}
+      />
 
-              <div>
-                <label className="block text-[9px] font-bold uppercase text-gray-600 mb-1">Fotos de la playa</label>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleBeachImagesUpload}
-                  className="w-full text-[10px] text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-[10px] file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300 cursor-pointer"
-                />
-                {newBeachImages.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {newBeachImages.map((img, idx) => (
-                      <div key={idx} className="relative w-16 h-16 rounded-xl overflow-hidden border border-gray-300">
-                        <img src={img} className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => setNewBeachImages(prev => prev.filter((_, i) => i !== idx))}
-                          className="absolute top-0.5 right-0.5 bg-black/60 hover:bg-black/80 text-white rounded-full p-0.5"
-                        >
-                          <X size={10} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+      {/* Profile setup modal */}
+      <ProfileSetupModal
+        isOpen={isProfileSetupOpen}
+        profileSetupUsername={profileSetupUsername}
+        setProfileSetupUsername={setProfileSetupUsername}
+        profileSetupAvatarUrl={profileSetupAvatarUrl}
+        setProfileSetupAvatarUrl={setProfileSetupAvatarUrl}
+        onSubmit={submitProfileSetup}
+      />
 
-              {drawingPoints.length > 0 && (
-                <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-800 text-[10.5px]">
-                  <span>Polígono delimitado exitosamente en el mapa: <strong>{drawingPoints.length} vértices</strong> registrados.</span>
-                </div>
-              )}
+      {/* User profile view details modal */}
+      <UserProfileViewModal
+        isOpen={isProfileViewOpen}
+        onClose={() => setIsProfileViewOpen(false)}
+        selectedUserProfile={selectedUserProfile}
+        userProfile={userProfile}
+        isEditingBio={isEditingBio}
+        setIsEditingBio={setIsEditingBio}
+        editBioText={editBioText}
+        setEditBioText={setEditBioText}
+        onSaveBio={saveUserBio}
+        userStats={userStats}
+      />
 
-              <button
-                type="submit"
-                className="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:brightness-105 rounded-xl font-semibold text-white transition-all shadow"
-              >
-                Guardar playa registrada
-              </button>
+      {/* Report incident blocker modal */}
+      <ReportBlockerModal
+        isOpen={isReportOpen}
+        onClose={() => setIsReportOpen(false)}
+        selectedAccess={selectedAccess}
+        reportBlockerType={reportBlockerType}
+        setReportBlockerType={setReportBlockerType}
+        reportBlockerName={reportBlockerName}
+        setReportBlockerName={setReportBlockerName}
+        reportReporterName={reportReporterName}
+        setReportReporterName={setReportReporterName}
+        reportDescription={reportDescription}
+        setReportDescription={setReportDescription}
+        reportHasFee={reportHasFee}
+        setReportHasFee={setReportHasFee}
+        reportFeeAmount={reportFeeAmount}
+        setReportFeeAmount={setReportFeeAmount}
+        onSubmit={submitIncidentReport}
+      />
 
-            </form>
-          </div>
-        </div>
-      )}
+      {/* Add new Beach modal */}
+      <NewBeachModal
+        isOpen={isNewBeachOpen}
+        onClose={() => setIsNewBeachOpen(false)}
+        newBeachName={newBeachName}
+        setNewBeachName={setNewBeachName}
+        newBeachState={newBeachState}
+        setNewBeachState={setNewBeachState}
+        newBeachImages={newBeachImages}
+        setNewBeachImages={setNewBeachImages}
+        drawingPoints={drawingPoints}
+        onMinimizeDraw={() => {
+          setIsNewBeachOpen(false);
+          setIsFormMinimized(true);
+          setDrawMode('beach');
+          setDrawingPoints([]);
+          const el = document.getElementById('explorer-section');
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }}
+        handleBeachImagesUpload={handleBeachImagesUpload}
+        onSubmit={submitNewBeach}
+      />
 
-      {/* MODAL: REGISTER ACCESS */}
-      {isNewAccessOpen && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-          <div className="relative w-full max-w-lg bg-[#EFEFEF] border border-gray-300 rounded-3xl overflow-hidden shadow-2xl p-5 sm:p-6 max-h-[85vh] overflow-y-auto">
-            
-            <div className="flex items-center justify-between pb-3 border-b border-gray-250 mb-4">
-              <div className="text-left">
-                <h3 className="text-base font-bold text-gray-905">Registrar acceso público</h3>
-                <p className="text-[9.5px] text-gray-500 mt-0.5">Agrega un sendero de entrada, servicios y reportes de cobros</p>
-              </div>
-              <button
-                onClick={() => setIsNewAccessOpen(false)}
-                className="p-1.5 rounded-lg bg-gray-200/60 text-gray-500 hover:text-gray-900"
-              >
-                <X size={16} />
-              </button>
-            </div>
+      {/* Add new Access modal */}
+      <NewAccessModal
+        isOpen={isNewAccessOpen}
+        onClose={() => setIsNewAccessOpen(false)}
+        beaches={beaches}
+        newAccessName={newAccessName}
+        setNewAccessName={setNewAccessName}
+        newAccessBeachId={newAccessBeachId}
+        setNewAccessBeachId={setNewAccessBeachId}
+        placedPinCoordinates={placedPinCoordinates}
+        trailDrawingPoints={trailDrawingPoints}
+        newAccessImages={newAccessImages}
+        setNewAccessImages={setNewAccessImages}
+        newAccessBlocker={newAccessBlocker}
+        setNewAccessBlocker={setNewAccessBlocker}
+        newAccessBlockerName={newAccessBlockerName}
+        setNewAccessBlockerName={setNewAccessBlockerName}
+        newAccessBlockerDesc={newAccessBlockerDesc}
+        setNewAccessBlockerDesc={setNewAccessBlockerDesc}
+        newAccessIllegalFee={newAccessIllegalFee}
+        setNewAccessIllegalFee={setNewAccessIllegalFee}
+        newAccessFeeAmount={newAccessFeeAmount}
+        setNewAccessFeeAmount={setNewAccessFeeAmount}
+        newAccessAmenities={newAccessAmenities}
+        setNewAccessAmenities={setNewAccessAmenities}
+        newAccessAccessibility={newAccessAccessibility}
+        setNewAccessAccessibility={setNewAccessAccessibility}
+        onMinimizeDraw={(mode) => {
+          setIsNewAccessOpen(false);
+          setIsFormMinimized(true);
+          setDrawMode(mode);
+          if (mode === 'trail') {
+            setTrailDrawingPoints([]);
+          }
+          const el = document.getElementById('explorer-section');
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }}
+        handleAccessImagesUpload={handleAccessImagesUpload}
+        onSubmit={submitNewAccess}
+        nearestBeach={nearestBeach}
+      />
 
-            <form onSubmit={submitNewAccess} className="space-y-4 text-xs text-left">
-              <div className="grid grid-cols-2 gap-3.5">
-                <div>
-                  <label className="block text-[9px] font-bold uppercase text-gray-600 mb-1">Nombre del acceso *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Ej. Entrada Rinconada"
-                    value={newAccessName}
-                    onChange={(e) => setNewAccessName(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl bg-white border border-gray-300 text-gray-905 placeholder-gray-400 outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[9px] font-bold uppercase text-gray-600 mb-1">Vincular a playa pública</label>
-                  <select
-                    value={newAccessBeachId}
-                    onChange={(e) => {
-                      const bId = e.target.value;
-                      setNewAccessBeachId(bId);
-                      const beach = beaches.find(b => b.id === bId);
-                      if (beach) {
-                        setMapCenter([beach.latitude, beach.longitude]);
-                        setMapZoom(15);
-                      }
-                    }}
-                    className="w-full px-3 py-2.5 rounded-xl bg-white border border-gray-300 text-gray-905 outline-none cursor-pointer font-medium"
-                  >
-                    <option value="">Selecciona playa...</option>
-                    {beaches.map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.name} ({b.state})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+      {/* Ficha de playa completa y comentarios modal */}
+      <BeachDetailsModal
+        isOpen={beachDetailOpen}
+        onClose={() => setBeachDetailOpen(false)}
+        selectedBeach={selectedBeach}
+        selectedBeachComments={selectedBeachComments}
+        newCommentText={newCommentText}
+        setNewCommentText={setNewCommentText}
+        onSubmitComment={submitComment}
+        userProfile={userProfile}
+        handleLogin={handleLogin}
+        setLightboxImage={setLightboxImage}
+        visibleImagesLimit={visibleImagesLimit}
+        setVisibleImagesLimit={setVisibleImagesLimit}
+        setSelectedAccessId={setSelectedAccessId}
+        setMapCenter={setMapCenter}
+        viewUserProfile={viewUserProfile}
+      />
 
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsNewAccessOpen(false);
-                    setIsFormMinimized(true);
-                    setDrawMode('access_pin');
-                    const el = document.getElementById('explorer-section');
-                    if (el) el.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                  className="py-2.5 bg-gray-200 hover:bg-gray-300/80 border border-gray-350 text-gray-800 rounded-xl text-center font-bold"
-                >
-                  Fijar entrada en mapa
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsNewAccessOpen(false);
-                    setIsFormMinimized(true);
-                    setDrawMode('trail');
-                    setTrailDrawingPoints([]);
-                    const el = document.getElementById('explorer-section');
-                    if (el) el.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                  className="py-2.5 bg-gray-200 hover:bg-gray-300/80 border border-gray-350 text-gray-800 rounded-xl text-center font-bold"
-                >
-                  Trazar sendero a pie
-                </button>
-              </div>
-
-              <div>
-                <label className="block text-[9px] font-bold uppercase text-gray-600 mb-1">Fotos de obstrucción / acceso</label>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleAccessImagesUpload}
-                  className="w-full text-[10px] text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-[10px] file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300 cursor-pointer"
-                />
-                {newAccessImages.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {newAccessImages.map((img, idx) => (
-                      <div key={idx} className="relative w-16 h-16 rounded-xl overflow-hidden border border-gray-300">
-                        <img src={img} className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => setNewAccessImages(prev => prev.filter((_, i) => i !== idx))}
-                          className="absolute top-0.5 right-0.5 bg-black/60 hover:bg-black/80 text-white rounded-full p-0.5"
-                        >
-                          <X size={10} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {placedPinCoordinates && nearestBeach && (
-                <div className="p-3.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-[10.5px] leading-relaxed">
-                  {nearestBeach.distance < 3.0 ? (
-                    <span>Playa vinculada automáticamente: <strong>{nearestBeach.beach.name}</strong> a una distancia estimada de <strong>{(nearestBeach.distance * 1000).toFixed(0)} metros</strong> de la entrada marcada.</span>
-                  ) : (
-                    <span className="text-amber-800">
-                      <strong>Advertencia:</strong> La playa más cercana está a <strong>{nearestBeach.distance.toFixed(1)} km</strong> de este acceso. Te recomendamos crear una playa colindante antes.
-                    </span>
-                  )}
-                </div>
-              )}
-
-              <div>
-                <label className="block text-[9px] font-bold uppercase text-gray-600 mb-1.5">Servicios de acceso y a11y</label>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2 p-3 rounded-xl bg-gray-205/50 border border-gray-300/40 text-gray-700">
-                  <label className="flex items-center gap-1.5 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={newAccessAmenities.parking}
-                      onChange={(e) => setNewAccessAmenities({ ...newAccessAmenities, parking: e.target.checked })}
-                      className="accent-[#0871E7]"
-                    />
-                    <span>Estacionamiento público</span>
-                  </label>
-                  <label className="flex items-center gap-1.5 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={newAccessAmenities.security}
-                      onChange={(e) => setNewAccessAmenities({ ...newAccessAmenities, security: e.target.checked })}
-                      className="accent-[#0871E7]"
-                    />
-                    <span>Seguridad / salvavidas</span>
-                  </label>
-                  <label className="flex items-center gap-1.5 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={newAccessAmenities.showers}
-                      onChange={(e) => setNewAccessAmenities({ ...newAccessAmenities, showers: e.target.checked })}
-                      className="accent-[#0871E7]"
-                    />
-                    <span>Baños / regaderas</span>
-                  </label>
-                  <label className="flex items-center gap-1.5 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={newAccessAmenities.pets}
-                      onChange={(e) => setNewAccessAmenities({ ...newAccessAmenities, pets: e.target.checked })}
-                      className="accent-[#0871E7]"
-                    />
-                    <span>Admite mascotas</span>
-                  </label>
-                  <label className="flex items-center gap-1.5 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={newAccessAccessibility.ramps}
-                      onChange={(e) => setNewAccessAccessibility({ ...newAccessAccessibility, ramps: e.target.checked })}
-                      className="accent-[#0871E7]"
-                    />
-                    <span>Rampa de acceso</span>
-                  </label>
-                  <label className="flex items-center gap-1.5 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={newAccessAccessibility.wheelchair}
-                      onChange={(e) => setNewAccessAccessibility({ ...newAccessAccessibility, wheelchair: e.target.checked })}
-                      className="accent-[#0871E7]"
-                    />
-                    <span>Silla de ruedas</span>
-                  </label>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[9px] font-bold uppercase text-gray-600 mb-1">Estado de obstrucción de acceso</label>
-                <select
-                  value={newAccessBlocker}
-                  onChange={(e) => setNewAccessBlocker(e.target.value as any)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-white border border-gray-300 text-gray-800 outline-none cursor-pointer font-medium"
-                >
-                  <option value="None">Abierto - Libre tránsito peatonal</option>
-                  <option value="Hotel">Obstruido por hotel comercial</option>
-                  <option value="Condo">Obstruido por condominios residenciales</option>
-                  <option value="Restaurant">Obstruido por restaurante / comercio</option>
-                  <option value="Beach Club">Obstruido por club de playa privado</option>
-                  <option value="Private Property">Cercado de propiedad privada</option>
-                  <option value="Insecurity">Inseguridad / violencia en la zona</option>
-                  <option value="Other">Otro bloqueo o reja soldada</option>
-                </select>
-              </div>
-
-              {newAccessBlocker !== 'None' && (
-                <div className="space-y-3 p-3.5 rounded-xl bg-red-50 border border-red-200/60 transition-all duration-300">
-                  <div>
-                    <label className="block text-[9px] font-bold uppercase text-red-705 mb-1">Nombre de entidad responsable *</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Ej. Beach Club Coral"
-                      value={newAccessBlockerName}
-                      onChange={(e) => setNewAccessBlockerName(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-white border border-gray-300 text-gray-905 outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[9px] font-bold uppercase text-red-705 mb-1">Detallar obstrucción *</label>
-                    <textarea
-                      required
-                      rows={2}
-                      placeholder="Ej. Obstruyen la servidumbre de paso argumentando que es propiedad del club..."
-                      value={newAccessBlockerDesc}
-                      onChange={(e) => setNewAccessBlockerDesc(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-white border border-gray-300 text-gray-905 outline-none"
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <label className="flex items-center gap-1.5 cursor-pointer text-gray-750">
-                      <input
-                        type="checkbox"
-                        checked={newAccessIllegalFee}
-                        onChange={(e) => setNewAccessIllegalFee(e.target.checked)}
-                        className="accent-red-600"
-                      />
-                      <span>¿Exigen cobro ilegal para cruzar?</span>
-                    </label>
-                    {newAccessIllegalFee && (
-                      <div className="flex items-center gap-1">
-                        <span className="text-[10px] text-gray-400 font-bold">$</span>
-                        <input
-                          type="number"
-                          required
-                          placeholder="Monto MXN"
-                          value={newAccessFeeAmount}
-                          onChange={(e) => setNewAccessFeeAmount(e.target.value)}
-                          className="w-24 px-2 py-1 rounded bg-white border border-gray-300 text-gray-905 font-mono text-center outline-none"
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                className="w-full py-3.5 bg-[#0871E7] hover:brightness-105 rounded-xl font-semibold text-white transition-all shadow"
-              >
-                Guardar acceso público registrado
-              </button>
-            </form>
-
-          </div>
-        </div>
-      )}
-
-      {/* MODAL: REPORT BLOCKER */}
-      {isReportOpen && selectedAccess && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-          <div className="relative w-full max-w-md bg-[#EFEFEF] border border-gray-300 rounded-3xl overflow-hidden shadow-2xl p-5 sm:p-6 text-left">
-            
-            <div className="flex items-center justify-between pb-3 border-b border-gray-250 mb-4">
-              <div>
-                <h3 className="text-base font-bold text-gray-955">Reportar privatización o anomalía</h3>
-                <p className="text-[9.5px] text-gray-500 mt-0.5">Acceso: {selectedAccess.name}</p>
-              </div>
-              <button
-                onClick={() => setIsReportOpen(false)}
-                className="p-1.5 rounded-lg bg-gray-200/60 text-gray-500 hover:text-gray-900"
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            <form onSubmit={submitIncidentReport} className="space-y-4 text-xs">
-              <div>
-                <label className="block text-[9px] font-bold uppercase text-gray-600 mb-1">Entidad responsable de la obstrucción *</label>
-                <select
-                  value={reportBlockerType}
-                  onChange={(e) => setReportBlockerType(e.target.value as any)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-white border border-gray-300 text-gray-800 outline-none cursor-pointer"
-                >
-                  <option value="Hotel">Hotel comercial</option>
-                  <option value="Condo">Condominios residenciales</option>
-                  <option value="Restaurant">Restaurante / local comercial</option>
-                  <option value="Beach Club">Club de playa privado</option>
-                  <option value="Private Property">Cercado de propiedad privada</option>
-                  <option value="Insecurity">Inseguridad / violencia en la zona</option>
-                  <option value="Other">Otro tipo de bloqueo peatonal o rejas</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[9px] font-bold uppercase text-gray-600 mb-1">Nombre de la entidad responsable *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ej. Condominio Las Brisas"
-                  value={reportBlockerName}
-                  onChange={(e) => setReportBlockerName(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-white border border-gray-300 text-gray-905 placeholder-gray-400 outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[9px] font-bold uppercase text-gray-600 mb-1">Tu nombre (opcional)</label>
-                <input
-                  type="text"
-                  placeholder="Dejar vacío para enviar anónimamente"
-                  value={reportReporterName}
-                  onChange={(e) => setReportReporterName(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-white border border-gray-300 text-gray-905 placeholder-gray-400 outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[9px] font-bold uppercase text-gray-600 mb-1">Detalles del incidente *</label>
-                <textarea
-                  required
-                  rows={3}
-                  placeholder="Describe qué obstrucción encontraste: portones cerrados, guardias privados, cobros de peaje..."
-                  value={reportDescription}
-                  onChange={(e) => setReportDescription(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-white border border-gray-300 text-gray-905 placeholder-gray-400 outline-none"
-                />
-              </div>
-
-              <div className="flex items-center justify-between p-3 rounded-xl bg-red-50 border border-red-200">
-                <label className="flex items-center gap-1.5 cursor-pointer text-gray-750">
-                  <input
-                    type="checkbox"
-                    checked={reportHasFee}
-                    onChange={(e) => setReportHasFee(e.target.checked)}
-                    className="accent-red-600"
-                  />
-                  <span>¿Exigen cobro obligatorio para cruzar?</span>
-                </label>
-                {reportHasFee && (
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] text-gray-400 font-bold">$</span>
-                    <input
-                      type="number"
-                      required
-                      placeholder="MXN"
-                      value={reportFeeAmount}
-                      onChange={(e) => setReportFeeAmount(e.target.value)}
-                      className="w-20 px-2 py-1 rounded bg-white border border-gray-300 text-gray-905 text-center font-mono outline-none"
-                    />
-                  </div>
-                )}
-              </div>
-
-              <button
-                type="submit"
-                className="w-full py-3.5 bg-red-600 hover:bg-red-500 rounded-xl font-semibold text-white shadow transition-all border border-red-500/20"
-              >
-                Enviar denuncia a PlayaLibre
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL: AUTH PROMPT */}
-      {isAuthPromptOpen && (
-        <div className="fixed inset-0 z-[11000] flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-          <div className="relative w-full max-w-md bg-[#EFEFEF] border border-gray-300 rounded-3xl overflow-hidden shadow-2xl p-6 text-left">
-            <div className="flex items-center justify-between pb-3 border-b border-gray-250 mb-5">
-              <div>
-                <h3 className="text-base font-bold text-gray-900">Registro requerido</h3>
-                <p className="text-[9.5px] text-gray-500 mt-0.5">Únete a la comunidad colaborativa de PlayaLibre</p>
-              </div>
-              <button
-                onClick={() => {
-                  setIsAuthPromptOpen(false);
-                  setPendingAuthAction(null);
-                  setIsEmailAuthOpen(false);
-                  setEmailAuthEmail('');
-                  setEmailAuthPassword('');
-                }}
-                className="p-1.5 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-500 hover:text-gray-900 transition-colors"
-              >
-                <X size={14} />
-              </button>
-            </div>
-
-            {isEmailAuthOpen ? (
-              <form onSubmit={handleEmailPasswordSubmit} className="space-y-4 text-xs">
-                <div className="flex items-center justify-between border-b border-gray-200 pb-2 mb-2">
-                  <span className="font-bold text-gray-700">
-                    {emailAuthMode === 'login' ? 'Iniciar sesión con correo' : 'Crear cuenta con correo'}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEmailAuthMode(emailAuthMode === 'login' ? 'signup' : 'login');
-                    }}
-                    className="text-[#0871E7] font-semibold hover:underline"
-                  >
-                    {emailAuthMode === 'login' ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}
-                  </button>
-                </div>
-
-                <div>
-                  <label className="block text-[9px] font-bold uppercase text-gray-600 mb-1">Correo electrónico</label>
-                  <input
-                    type="email"
-                    required
-                    placeholder="correo@ejemplo.com"
-                    value={emailAuthEmail}
-                    onChange={(e) => setEmailAuthEmail(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl bg-white border border-gray-300 text-gray-905 outline-none font-sans"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[9px] font-bold uppercase text-gray-600 mb-1">Contraseña</label>
-                  <input
-                    type="password"
-                    required
-                    placeholder="••••••••"
-                    value={emailAuthPassword}
-                    onChange={(e) => setEmailAuthPassword(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl bg-white border border-gray-300 text-gray-905 outline-none font-mono"
-                  />
-                </div>
-
-                <div className="pt-2 flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setIsEmailAuthOpen(false)}
-                    className="flex-1 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-semibold transition-all text-center"
-                  >
-                    Volver
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 py-3 bg-[#0871E7] hover:bg-[#065ec2] text-white rounded-xl font-semibold transition-all text-center shadow"
-                  >
-                    {emailAuthMode === 'login' ? 'Iniciar sesión' : 'Registrarse'}
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <div className="space-y-4 text-xs">
-                <div className="bg-[#0871E7]/5 border border-[#0871E7]/25 p-4 rounded-2xl text-gray-700 leading-relaxed">
-                  <p>
-                    Para registrar una nueva playa o acceso público, necesitamos validar tu cuenta. Esto nos ayuda a:
-                  </p>
-                  <ul className="list-disc pl-4 mt-2 space-y-1 text-gray-600 font-medium">
-                    <li>Evitar registros falsos o duplicados en el mapa.</li>
-                    <li>Construir tu reputación como colaborador confiable.</li>
-                    <li>Permitirte gestionar y actualizar la información de las playas que registres.</li>
-                  </ul>
-                </div>
-
-                <div className="space-y-2 pt-2">
-                  <button
-                    onClick={handleLogin}
-                    type="button"
-                    className="w-full py-3 bg-[#0871E7] hover:bg-[#065ec2] active:scale-[0.99] rounded-xl font-semibold text-white transition-all shadow flex items-center justify-center gap-2"
-                  >
-                    <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                      <path d="M12.24 10.285V13.4h6.887c-.275 1.565-1.88 4.604-6.887 4.604-4.33 0-7.866-3.577-7.866-8s3.536-8 7.866-8c2.46 0 4.105 1.025 5.047 1.926l2.427-2.334C17.955 2.192 15.34 1 12.24 1 5.923 1 12.24s4.923 11.24 11.24 11.24c6.59 0 11.01-4.636 11.01-11.24 0-.756-.08-1.333-.18-1.955H12.24z"/>
-                    </svg>
-                    <span>Continuar con Google</span>
-                  </button>
-                </div>
-
-                <div className="pt-4 text-center border-t border-gray-250 flex flex-col gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsEmailAuthOpen(true);
-                      setEmailAuthMode('login');
-                    }}
-                    className="text-[#0871E7] font-semibold hover:underline"
-                  >
-                    O registrarse/iniciar sesión con correo y contraseña
-                  </button>
-                  <p className="text-[9.5px] text-gray-500 leading-normal">
-                    Al registrarte, aceptas nuestros términos de servicio y políticas de privacidad.
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-      {/* MODAL: EMAIL VERIFICATION PENDING */}
-      {isEmailVerificationPending && (
-        <div className="fixed inset-0 z-[11000] flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-          <div className="relative w-full max-w-md bg-[#EFEFEF] border border-gray-300 rounded-3xl overflow-hidden shadow-2xl p-6 text-left space-y-4">
-            <div className="flex items-center gap-2 pb-3 border-b border-gray-250">
-              <Info className="text-[#0871E7]" size={20} />
-              <div>
-                <h3 className="text-base font-bold text-gray-900">Verifica tu correo electrónico</h3>
-                <p className="text-[9.5px] text-gray-500 mt-0.5">Requerido para activar tu cuenta colaborativa</p>
-              </div>
-            </div>
-
-            <div className="text-xs text-gray-700 leading-relaxed space-y-3">
-              <p>
-                Hemos enviado un enlace de verificación a la dirección de correo:
-              </p>
-              <div className="p-3 bg-gray-200/60 border border-gray-350 rounded-xl text-center font-semibold text-gray-900">
-                {currentUser?.email || emailAuthEmail}
-              </div>
-              <p>
-                Sigue las instrucciones del enlace recibido en tu bandeja de entrada (revisa también tu carpeta de spam o correo no deseado) para verificar tu identidad. Una vez completado, pulsa el botón de abajo.
-              </p>
-            </div>
-
-            <div className="space-y-2 pt-2">
-              <button
-                type="button"
-                onClick={async () => {
-                  if (authInstance?.currentUser) {
-                    await authInstance.currentUser.reload();
-                    if (authInstance.currentUser.emailVerified) {
-                      showToast('Correo verificado exitosamente.', 'success');
-                      await handleSuccessfulVerification();
-                    } else {
-                      showToast('El correo aún no ha sido verificado. Por favor, haz clic en el enlace que te enviamos.', 'warn');
-                    }
-                  }
-                }}
-                className="w-full py-3 bg-[#0871E7] hover:bg-[#065ec2] active:scale-[0.99] text-white rounded-xl font-semibold transition-all text-center shadow"
-              >
-                Ya verifiqué mi correo
-              </button>
-
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={async () => {
-                    if (authInstance?.currentUser) {
-                      try {
-                        await sendEmailVerification(authInstance.currentUser);
-                        showToast('Correo de verificación reenviado.', 'success');
-                      } catch (err) {
-                        console.error('Error resending email:', err);
-                        showToast('No se pudo reenviar el correo. Inténtalo más tarde.', 'warn');
-                      }
-                    }
-                  }}
-                  className="flex-1 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-medium transition-all text-center text-[10px]"
-                >
-                  Reenviar correo
-                </button>
-
-                <button
-                  type="button"
-                  onClick={async () => {
-                    if (authInstance) {
-                      await signOut(authInstance);
-                    }
-                    setIsEmailVerificationPending(false);
-                  }}
-                  className="flex-1 py-2.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-xl font-medium transition-all text-center text-[10px]"
-                >
-                  Cancelar / Salir
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL: PROFILE SETUP */}
-      {isProfileSetupOpen && (
-        <div className="fixed inset-0 z-[11000] flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-          <div className="relative w-full max-w-md bg-[#EFEFEF] border border-gray-300 rounded-3xl overflow-hidden shadow-2xl p-6 text-left">
-            <div className="flex items-center justify-between pb-3 border-b border-gray-250 mb-4">
-              <div>
-                <h3 className="text-base font-bold text-gray-900">Crear perfil de usuario</h3>
-                <p className="text-[9.5px] text-gray-500 mt-0.5">Elige un apodo y avatar para mantener tu privacidad</p>
-              </div>
-            </div>
-
-            <form onSubmit={submitProfileSetup} className="space-y-5 text-xs">
-              <div>
-                <label className="block text-[9.5px] font-bold uppercase text-gray-600 mb-1">Nombre de usuario</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ej. GuardiánDeLaCosta"
-                  value={profileSetupUsername}
-                  onChange={(e) => setProfileSetupUsername(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-white border border-gray-300 text-gray-900 outline-none"
-                />
-                <p className="text-[10px] text-gray-500 mt-1.5 select-none leading-normal">
-                  Para garantizar la unicidad de tu cuenta, se le anexará automáticamente una etiqueta numérica derivada del tiempo de registro (ej. <strong>{profileSetupUsername.trim() || 'GuardiánDeLaCosta'}_{Date.now().toString().slice(-4)}</strong>).
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-[9.5px] font-bold uppercase text-gray-600 mb-2">Elige tu avatar</label>
-                <div className="grid grid-cols-4 gap-3 bg-gray-200/50 p-4 rounded-2xl border border-gray-300/40">
-                  {AVATAR_PRESETS.map((preset) => {
-                    const presetVal = `preset:${preset.emoji}:${preset.bg}`;
-                    const isSelected = profileSetupAvatarUrl === presetVal;
-                    return (
-                      <button
-                        key={preset.label}
-                        type="button"
-                        onClick={() => setProfileSetupAvatarUrl(presetVal)}
-                        className={`w-12 h-12 rounded-full bg-gradient-to-br ${preset.bg} flex items-center justify-center text-2xl transition-all duration-200 relative ${
-                          isSelected ? 'scale-110 shadow-lg ring-4 ring-[#0871E7] ring-offset-2 ring-offset-[#EFEFEF]' : 'opacity-70 hover:opacity-100 hover:scale-105'
-                        }`}
-                        title={preset.label}
-                      >
-                        <span>{preset.emoji}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full py-3.5 bg-[#0871E7] hover:brightness-105 rounded-xl font-semibold text-white transition-all shadow"
-              >
-                Guardar perfil
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL: BEACH DETAILS */}
-      {beachDetailOpen && selectedBeach && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-          <div className="relative w-full max-w-5xl h-[90vh] bg-[#EFEFEF] border border-gray-300 rounded-[28px] overflow-hidden shadow-2xl flex flex-col p-6 sm:p-8 text-left">
-            
-            {/* Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-gray-250 mb-6">
-              <div>
-                <span className="text-[10px] font-bold text-[#0871E7] uppercase tracking-widest">{selectedBeach.state}</span>
-                <h3 className="text-2xl font-bold text-gray-900 font-fustat leading-none mt-1">{selectedBeach.name}</h3>
-              </div>
-              <button
-                onClick={() => setBeachDetailOpen(false)}
-                className="p-2 rounded-xl bg-gray-200 hover:bg-gray-300/80 text-gray-500 hover:text-gray-900 transition-colors"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 overflow-y-auto pr-1 flex-1 text-xs">
-              
-              {/* Left Column */}
-              <div className="lg:col-span-7 flex flex-col gap-6">
-                
-                {/* Local Zoom Map */}
-                <div>
-                  <h4 className="font-bold text-gray-900 mb-2">Ubicación y accesos en el mapa</h4>
-                  <div className="w-full h-72 rounded-2xl border border-gray-300 overflow-hidden shadow-sm bg-[#151c14] relative z-10">
-                    <MapContainer
-                      key={`detail-map-${selectedBeach.id}`}
-                      center={[selectedBeach.latitude, selectedBeach.longitude]}
-                      zoom={15}
-                      zoomControl={false}
-                      className="w-full h-full"
-                    >
-                      <TileLayer
-                        attribution='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-                        url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-                      />
-                      <ZoomControl position="topright" />
-                      
-                      {selectedBeach.boundaryPolygon && selectedBeach.boundaryPolygon.length > 2 && (
-                        <Polygon
-                          positions={selectedBeach.boundaryPolygon}
-                          pathOptions={{
-                            color: '#F26522',
-                            fillColor: '#F26522',
-                            fillOpacity: 0.3,
-                            weight: 3
-                          }}
-                        />
-                      )}
-
-                      {selectedBeach.accesses.map((acc) => {
-                        const isBlocked = acc.blockerType !== 'None';
-                        return (
-                          <Marker
-                            key={`detail-marker-${acc.id}`}
-                            position={[acc.latitude, acc.longitude]}
-                            icon={createAccessIcon(isBlocked, false)}
-                          >
-                            <Popup>
-                              <div className="text-gray-900 font-sans p-1 text-[11px] leading-tight">
-                                <h5 className="font-bold">{acc.name}</h5>
-                                <span className={`text-[8.5px] px-1.5 py-0.5 rounded font-bold uppercase mt-1 inline-block text-white ${
-                                  isBlocked ? 'bg-red-500' : 'bg-emerald-500'
-                                }`}>
-                                  {isBlocked ? 'Bloqueado' : 'Acceso libre'}
-                                </span>
-                              </div>
-                            </Popup>
-                          </Marker>
-                        );
-                      })}
-                    </MapContainer>
-                  </div>
-                </div>
-
-                {/* Available Accesses List */}
-                <div>
-                  <h4 className="font-bold text-gray-900 mb-2 font-fustat">Accesos públicos vinculados</h4>
-                  {selectedBeach.accesses && selectedBeach.accesses.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-48 overflow-y-auto pr-1">
-                      {selectedBeach.accesses.map((acc) => {
-                        const isBlocked = acc.blockerType !== 'None';
-                        return (
-                          <div 
-                            key={acc.id} 
-                            onClick={() => {
-                              setSelectedAccessId(acc.id);
-                              setMapCenter([acc.latitude, acc.longitude]);
-                            }}
-                            className={`p-3 rounded-2xl border transition-all cursor-pointer select-none text-left ${
-                              isBlocked 
-                                ? 'bg-red-50/40 border-red-200/60 hover:bg-red-50/70' 
-                                : 'bg-emerald-50/30 border-emerald-200/50 hover:bg-emerald-50/50'
-                            }`}
-                          >
-                            <div className="flex justify-between items-start gap-2">
-                              <span className="font-bold text-gray-800 leading-tight block">{acc.name}</span>
-                              <span className={`text-[8.5px] px-1.5 py-0.5 rounded font-bold uppercase text-white flex-shrink-0 ${
-                                isBlocked ? 'bg-red-500' : 'bg-emerald-500'
-                              }`}>
-                                {isBlocked ? 'Bloqueado' : 'Abierto'}
-                              </span>
-                            </div>
-                            {isBlocked && (
-                              <p className="text-[9.5px] text-red-700/80 mt-1 leading-normal">
-                                Obstrucción: <strong>{acc.blockerName}</strong> ({acc.blockerDescription})
-                              </p>
-                            )}
-                            <div className="flex gap-2.5 mt-2 text-[10px] text-gray-500 font-medium">
-                              <span>🅿️ {acc.parking ? 'Sí' : 'No'}</span>
-                              <span>🚿 {acc.showers ? 'Sí' : 'No'}</span>
-                              <span>♿ {acc.wheelchair ? 'Sí' : 'No'}</span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div className="py-6 bg-white rounded-2xl border border-gray-200 border-dashed text-center text-gray-400">
-                      No hay accesos públicos registrados para esta playa.
-                    </div>
-                  )}
-                </div>
-
-                {/* Photo Gallery */}
-                <div>
-                  <h4 className="font-bold text-gray-900 mb-2 font-fustat">Galería de fotos</h4>
-                  {(() => {
-                    const allPhotos = [
-                      ...(selectedBeach.images || []),
-                      ...selectedBeach.accesses.flatMap(a => a.images || [])
-                    ];
-
-                    if (allPhotos.length === 0) {
-                      return (
-                        <div className="py-8 bg-white rounded-2xl border border-gray-200 border-dashed flex flex-col items-center justify-center text-center text-gray-400 gap-2">
-                          <Camera size={24} className="text-gray-300" />
-                          <span>No hay fotos aún de esta playa.</span>
-                        </div>
-                      );
-                    }
-
-                    const visiblePhotos = allPhotos.slice(0, visibleImagesLimit);
-
-                    return (
-                      <div className="bg-white p-4 rounded-2xl border border-gray-200 space-y-3">
-                        <div className="grid grid-cols-4 gap-3">
-                          {visiblePhotos.map((photo, idx) => (
-                            <div
-                              key={idx}
-                              onClick={() => setLightboxImage(photo)}
-                              className="aspect-square rounded-xl overflow-hidden border border-gray-300 shadow-sm cursor-pointer hover:opacity-90 hover:scale-102 transition-all animate-fade-in"
-                            >
-                              <img src={photo} className="w-full h-full object-cover" alt="Playa" />
-                            </div>
-                          ))}
-                        </div>
-                        {allPhotos.length > visibleImagesLimit && (
-                          <button
-                            type="button"
-                            onClick={() => setVisibleImagesLimit(prev => prev + 4)}
-                            className="w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-center transition-colors text-[10.5px]"
-                          >
-                            Cargar más fotos ({allPhotos.length - visibleImagesLimit} restantes)
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })()}
-                </div>
-
-              </div>
-
-              {/* Right Column */}
-              <div className="lg:col-span-5 flex flex-col gap-6">
-                
-                {/* Timeline Chart */}
-                <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
-                  <h4 className="font-bold text-gray-900 mb-1">Reportes históricos por categoría</h4>
-                  <p className="text-[10px] text-gray-400 mb-4">Número acumulado de reportes en los últimos meses</p>
-                  
-                  <div className="h-40 w-full font-mono text-[9px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart
-                        data={computeTimelineData(selectedBeach)}
-                        margin={{ top: 5, right: 5, left: -25, bottom: 0 }}
-                      >
-                        <defs>
-                          <linearGradient id="colorFees" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#f97316" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
-                          </linearGradient>
-                          <linearGradient id="colorInsec" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
-                          </linearGradient>
-                          <linearGradient id="colorBlock" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                          </linearGradient>
-                          <linearGradient id="colorOther" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#9ca3af" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#9ca3af" stopOpacity={0}/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                        <XAxis dataKey="month" style={{ fontSize: '9px' }} />
-                        <YAxis style={{ fontSize: '9px' }} allowDecimals={false} />
-                        <Tooltip contentStyle={{ fontSize: '10px', borderRadius: '12px' }} />
-                        <Legend wrapperStyle={{ fontSize: '9px', paddingTop: '10px' }} />
-                        <Area type="monotone" name="Cobros" dataKey="illegalFees" stroke="#f97316" fill="url(#colorFees)" strokeWidth={1.5} stackId="1" />
-                        <Area type="monotone" name="Inseguridad" dataKey="insecurity" stroke="#ef4444" fill="url(#colorInsec)" strokeWidth={1.5} stackId="1" />
-                        <Area type="monotone" name="Bloqueos" dataKey="blockages" stroke="#3b82f6" fill="url(#colorBlock)" strokeWidth={1.5} stackId="1" />
-                        <Area type="monotone" name="Otros" dataKey="other" stroke="#9ca3af" fill="url(#colorOther)" strokeWidth={1.5} stackId="1" />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-
-                {/* Comments Section */}
-                <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex flex-col flex-1 min-h-[300px]">
-                  <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-1.5 font-fustat">
-                    <MessageSquare size={14} className="text-gray-400" />
-                    <span>Comentarios y reseñas</span>
-                  </h4>
-                  
-                  <div className="flex-1 overflow-y-auto space-y-3 mb-4 max-h-[220px] pr-1">
-                    {selectedBeachComments.length > 0 ? (
-                      selectedBeachComments.map((comment) => (
-                        <div key={comment.id} className="p-3 bg-gray-50 border border-gray-150 rounded-2xl flex gap-3">
-                          <UserAvatar avatarUrl={comment.user?.avatarUrl} username={comment.user?.username || 'Anónimo'} size="sm" />
-                          <div className="flex-1 flex flex-col gap-0.5">
-                            <div className="flex justify-between items-center">
-                              <span className="font-bold text-gray-800 text-[10px] flex items-center gap-1">
-                                {comment.user?.username || 'Anónimo'}
-                                <span className="px-1 py-0.2 bg-blue-50 text-[#0871E7] border border-blue-100 rounded text-[7.5px] font-bold">
-                                  ★ {comment.user?.reputation ?? 10}
-                                </span>
-                              </span>
-                              <span className="text-[8px] text-gray-400">
-                                {new Date(comment.createdAt).toLocaleDateString()}
-                              </span>
-                            </div>
-                            <p className="text-gray-650 leading-relaxed mt-0.5 text-left">{comment.text}</p>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="h-full flex flex-col items-center justify-center text-center text-gray-450 gap-2 py-8">
-                        <MessageSquare size={24} className="text-gray-300" />
-                        <span>No hay comentarios aún. ¡Escribe el primero!</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {userProfile ? (
-                    <form onSubmit={submitComment} className="flex gap-2">
-                      <input
-                        type="text"
-                        required
-                        placeholder="Escribe un comentario..."
-                        value={newCommentText}
-                        onChange={(e) => setNewCommentText(e.target.value)}
-                        className="flex-1 px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-300 text-gray-900 placeholder-gray-405 outline-none focus:border-gray-400"
-                      />
-                      <button
-                        type="submit"
-                        className="px-4 bg-[#0871E7] hover:bg-[#0762cb] text-white rounded-xl flex items-center justify-center shadow-sm"
-                      >
-                        <Send size={14} />
-                      </button>
-                    </form>
-                  ) : (
-                    <div className="p-3 bg-gray-150/40 rounded-xl border border-gray-200 text-center">
-                      <span className="text-[10px] text-gray-505 block mb-2">Debes iniciar sesión para publicar comentarios</span>
-                      <button
-                        type="button"
-                        onClick={handleLogin}
-                        className="px-4 py-1.5 bg-[#0871E7] hover:bg-[#0762cb] text-white text-[10px] font-bold rounded-lg shadow-sm"
-                      >
-                        Iniciar sesión
-                      </button>
-                    </div>
-                  )}
-
-                </div>
-
-              </div>
-
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL: LIGHTBOX */}
-      {lightboxImage && (
-        <div
-          className="fixed inset-0 z-[12000] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm cursor-zoom-out"
-          onClick={() => setLightboxImage(null)}
-        >
-          <div className="relative max-w-4xl max-h-[85vh] overflow-hidden rounded-2xl border border-white/10 shadow-2xl">
-            <img src={lightboxImage} className="max-w-full max-h-full object-contain" alt="Ampliada" />
-            <button
-              onClick={() => setLightboxImage(null)}
-              className="absolute top-4 right-4 p-2 bg-black/60 text-white rounded-full hover:bg-black/80 transition-colors"
-            >
-              <X size={20} />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL: PROFILE SETUP */}
       {/* Toast notifications */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-[10000] max-w-sm rounded-xl p-3.5 shadow-xl border flex gap-2.5 items-center transition-opacity duration-300 bg-white border-gray-200 text-xs font-semibold text-gray-900 select-none">

@@ -148,6 +148,7 @@ query GetUser($id: String!) @auth(level: PUBLIC) {
     id
     username
     avatarUrl
+    bio
     reputation
     createdAt
   }

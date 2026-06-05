@@ -74,7 +74,7 @@ Below are examples of how to use the `default-connector` connector's generated f
 ## ListBeaches
 You can execute the `ListBeaches` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
 ```typescript
-listBeaches(): QueryPromise<ListBeachesData, undefined>;
+listBeaches(options?: ExecuteQueryOptions): QueryPromise<ListBeachesData, undefined>;
 
 interface ListBeachesRef {
   ...
@@ -85,7 +85,7 @@ export const listBeachesRef: ListBeachesRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-listBeaches(dc: DataConnect): QueryPromise<ListBeachesData, undefined>;
+listBeaches(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListBeachesData, undefined>;
 
 interface ListBeachesRef {
   ...
@@ -123,32 +123,48 @@ export interface ListBeachesData {
       avatarUrl?: string | null;
       reputation: number;
     } & User_Key;
-      accesses_on_beach: ({
-        id: UUIDString;
-        name: string;
-        latitude: number;
-        longitude: number;
-        trailGeometry?: unknown | null;
-        images?: unknown | null;
-        pets: boolean;
-        shade: boolean;
-        showers: boolean;
-        parking: boolean;
-        security: boolean;
-        ramps: boolean;
-        wheelchair: boolean;
-        parkingReserved: boolean;
-        alcoholAllowed: boolean;
-        campingAllowed: boolean;
-        feeRequired: boolean;
-        wifi: boolean;
-        cellular4G: boolean;
-        blockerType: string;
-        blockerName?: string | null;
-        blockerDescription?: string | null;
-        illegalFeeAmount: number;
+    accesses_on_beach: ({
+      id: UUIDString;
+      name: string;
+      latitude: number;
+      longitude: number;
+      trailGeometry?: unknown | null;
+      images?: unknown | null;
+      pets: boolean;
+      shade: boolean;
+      showers: boolean;
+      parking: boolean;
+      security: boolean;
+      ramps: boolean;
+      wheelchair: boolean;
+      parkingReserved: boolean;
+      alcoholAllowed: boolean;
+      campingAllowed: boolean;
+      feeRequired: boolean;
+      wifi: boolean;
+      cellular4G: boolean;
+      blockerType: string;
+      blockerName?: string | null;
+      blockerDescription?: string | null;
+      illegalFeeAmount: number;
+      reputation: number;
+      isPendingCuration: boolean;
+      createdAt: DateString;
+      user?: {
+        id: string;
+        username: string;
+        avatarUrl?: string | null;
         reputation: number;
-        isPendingCuration: boolean;
+      } & User_Key;
+      reports_on_access: ({
+        id: UUIDString;
+        reporterName: string;
+        blockerType: string;
+        blockerName: string;
+        description: string;
+        hasIllegalFee: boolean;
+        feeAmount?: number | null;
+        score: number;
         createdAt: DateString;
         user?: {
           id: string;
@@ -156,24 +172,8 @@ export interface ListBeachesData {
           avatarUrl?: string | null;
           reputation: number;
         } & User_Key;
-          reports_on_access: ({
-            id: UUIDString;
-            reporterName: string;
-            blockerType: string;
-            blockerName: string;
-            description: string;
-            hasIllegalFee: boolean;
-            feeAmount?: number | null;
-            score: number;
-            createdAt: DateString;
-            user?: {
-              id: string;
-              username: string;
-              avatarUrl?: string | null;
-              reputation: number;
-            } & User_Key;
-          } & Report_Key)[];
-      } & Access_Key)[];
+      } & Report_Key)[];
+    } & Access_Key)[];
   } & Beach_Key)[];
 }
 ```
@@ -231,7 +231,7 @@ executeQuery(ref).then((response) => {
 ## GetBeachDetails
 You can execute the `GetBeachDetails` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
 ```typescript
-getBeachDetails(vars: GetBeachDetailsVariables): QueryPromise<GetBeachDetailsData, GetBeachDetailsVariables>;
+getBeachDetails(vars: GetBeachDetailsVariables, options?: ExecuteQueryOptions): QueryPromise<GetBeachDetailsData, GetBeachDetailsVariables>;
 
 interface GetBeachDetailsRef {
   ...
@@ -242,7 +242,7 @@ export const getBeachDetailsRef: GetBeachDetailsRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-getBeachDetails(dc: DataConnect, vars: GetBeachDetailsVariables): QueryPromise<GetBeachDetailsData, GetBeachDetailsVariables>;
+getBeachDetails(dc: DataConnect, vars: GetBeachDetailsVariables, options?: ExecuteQueryOptions): QueryPromise<GetBeachDetailsData, GetBeachDetailsVariables>;
 
 interface GetBeachDetailsRef {
   ...
@@ -287,32 +287,48 @@ export interface GetBeachDetailsData {
       reputation: number;
     } & User_Key;
   } & Beach_Key;
-    accesses: ({
-      id: UUIDString;
-      name: string;
-      latitude: number;
-      longitude: number;
-      trailGeometry?: unknown | null;
-      images?: unknown | null;
-      pets: boolean;
-      shade: boolean;
-      showers: boolean;
-      parking: boolean;
-      security: boolean;
-      ramps: boolean;
-      wheelchair: boolean;
-      parkingReserved: boolean;
-      alcoholAllowed: boolean;
-      campingAllowed: boolean;
-      feeRequired: boolean;
-      wifi: boolean;
-      cellular4G: boolean;
-      blockerType: string;
-      blockerName?: string | null;
-      blockerDescription?: string | null;
-      illegalFeeAmount: number;
+  accesses: ({
+    id: UUIDString;
+    name: string;
+    latitude: number;
+    longitude: number;
+    trailGeometry?: unknown | null;
+    images?: unknown | null;
+    pets: boolean;
+    shade: boolean;
+    showers: boolean;
+    parking: boolean;
+    security: boolean;
+    ramps: boolean;
+    wheelchair: boolean;
+    parkingReserved: boolean;
+    alcoholAllowed: boolean;
+    campingAllowed: boolean;
+    feeRequired: boolean;
+    wifi: boolean;
+    cellular4G: boolean;
+    blockerType: string;
+    blockerName?: string | null;
+    blockerDescription?: string | null;
+    illegalFeeAmount: number;
+    reputation: number;
+    isPendingCuration: boolean;
+    createdAt: DateString;
+    user?: {
+      id: string;
+      username: string;
+      avatarUrl?: string | null;
       reputation: number;
-      isPendingCuration: boolean;
+    } & User_Key;
+    reports_on_access: ({
+      id: UUIDString;
+      reporterName: string;
+      blockerType: string;
+      blockerName: string;
+      description: string;
+      hasIllegalFee: boolean;
+      feeAmount?: number | null;
+      score: number;
       createdAt: DateString;
       user?: {
         id: string;
@@ -320,24 +336,8 @@ export interface GetBeachDetailsData {
         avatarUrl?: string | null;
         reputation: number;
       } & User_Key;
-        reports_on_access: ({
-          id: UUIDString;
-          reporterName: string;
-          blockerType: string;
-          blockerName: string;
-          description: string;
-          hasIllegalFee: boolean;
-          feeAmount?: number | null;
-          score: number;
-          createdAt: DateString;
-          user?: {
-            id: string;
-            username: string;
-            avatarUrl?: string | null;
-            reputation: number;
-          } & User_Key;
-        } & Report_Key)[];
-    } & Access_Key)[];
+    } & Report_Key)[];
+  } & Access_Key)[];
 }
 ```
 ### Using `GetBeachDetails`'s action shortcut function
@@ -410,7 +410,7 @@ executeQuery(ref).then((response) => {
 ## GetUser
 You can execute the `GetUser` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
 ```typescript
-getUser(vars: GetUserVariables): QueryPromise<GetUserData, GetUserVariables>;
+getUser(vars: GetUserVariables, options?: ExecuteQueryOptions): QueryPromise<GetUserData, GetUserVariables>;
 
 interface GetUserRef {
   ...
@@ -421,7 +421,7 @@ export const getUserRef: GetUserRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-getUser(dc: DataConnect, vars: GetUserVariables): QueryPromise<GetUserData, GetUserVariables>;
+getUser(dc: DataConnect, vars: GetUserVariables, options?: ExecuteQueryOptions): QueryPromise<GetUserData, GetUserVariables>;
 
 interface GetUserRef {
   ...
@@ -454,6 +454,7 @@ export interface GetUserData {
     id: string;
     username: string;
     avatarUrl?: string | null;
+    bio?: string | null;
     reputation: number;
     createdAt: DateString;
   } & User_Key;
@@ -525,7 +526,7 @@ executeQuery(ref).then((response) => {
 ## GetCommentsForBeach
 You can execute the `GetCommentsForBeach` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
 ```typescript
-getCommentsForBeach(vars: GetCommentsForBeachVariables): QueryPromise<GetCommentsForBeachData, GetCommentsForBeachVariables>;
+getCommentsForBeach(vars: GetCommentsForBeachVariables, options?: ExecuteQueryOptions): QueryPromise<GetCommentsForBeachData, GetCommentsForBeachVariables>;
 
 interface GetCommentsForBeachRef {
   ...
@@ -536,7 +537,7 @@ export const getCommentsForBeachRef: GetCommentsForBeachRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
 ```typescript
-getCommentsForBeach(dc: DataConnect, vars: GetCommentsForBeachVariables): QueryPromise<GetCommentsForBeachData, GetCommentsForBeachVariables>;
+getCommentsForBeach(dc: DataConnect, vars: GetCommentsForBeachVariables, options?: ExecuteQueryOptions): QueryPromise<GetCommentsForBeachData, GetCommentsForBeachVariables>;
 
 interface GetCommentsForBeachRef {
   ...
@@ -1476,6 +1477,7 @@ export interface UpsertUserVariables {
   id: string;
   username: string;
   avatarUrl?: string | null;
+  bio?: string | null;
   reputation: number;
 }
 ```
@@ -1499,6 +1501,7 @@ const upsertUserVars: UpsertUserVariables = {
   id: ..., 
   username: ..., 
   avatarUrl: ..., // optional
+  bio: ..., // optional
   reputation: ..., 
 };
 
@@ -1506,7 +1509,7 @@ const upsertUserVars: UpsertUserVariables = {
 // You can use the `await` keyword to wait for the promise to resolve.
 const { data } = await upsertUser(upsertUserVars);
 // Variables can be defined inline as well.
-const { data } = await upsertUser({ id: ..., username: ..., avatarUrl: ..., reputation: ..., });
+const { data } = await upsertUser({ id: ..., username: ..., avatarUrl: ..., bio: ..., reputation: ..., });
 
 // You can also pass in a `DataConnect` instance to the action shortcut function.
 const dataConnect = getDataConnect(connectorConfig);
@@ -1532,13 +1535,14 @@ const upsertUserVars: UpsertUserVariables = {
   id: ..., 
   username: ..., 
   avatarUrl: ..., // optional
+  bio: ..., // optional
   reputation: ..., 
 };
 
 // Call the `upsertUserRef()` function to get a reference to the mutation.
 const ref = upsertUserRef(upsertUserVars);
 // Variables can be defined inline as well.
-const ref = upsertUserRef({ id: ..., username: ..., avatarUrl: ..., reputation: ..., });
+const ref = upsertUserRef({ id: ..., username: ..., avatarUrl: ..., bio: ..., reputation: ..., });
 
 // You can also pass in a `DataConnect` instance to the `MutationRef` function.
 const dataConnect = getDataConnect(connectorConfig);

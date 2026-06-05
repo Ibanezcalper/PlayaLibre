@@ -1,4 +1,4 @@
-import { ConnectorConfig, DataConnect, QueryRef, QueryPromise, MutationRef, MutationPromise } from 'firebase/data-connect';
+import { ConnectorConfig, DataConnect, QueryRef, QueryPromise, ExecuteQueryOptions, MutationRef, MutationPromise } from 'firebase/data-connect';
 
 export const connectorConfig: ConnectorConfig;
 
@@ -128,7 +128,113 @@ export interface GetBeachDetailsData {
       reputation: number;
     } & User_Key;
   } & Beach_Key;
-    accesses: ({
+  accesses: ({
+    id: UUIDString;
+    name: string;
+    latitude: number;
+    longitude: number;
+    trailGeometry?: unknown | null;
+    images?: unknown | null;
+    pets: boolean;
+    shade: boolean;
+    showers: boolean;
+    parking: boolean;
+    security: boolean;
+    ramps: boolean;
+    wheelchair: boolean;
+    parkingReserved: boolean;
+    alcoholAllowed: boolean;
+    campingAllowed: boolean;
+    feeRequired: boolean;
+    wifi: boolean;
+    cellular4G: boolean;
+    blockerType: string;
+    blockerName?: string | null;
+    blockerDescription?: string | null;
+    illegalFeeAmount: number;
+    reputation: number;
+    isPendingCuration: boolean;
+    createdAt: DateString;
+    user?: {
+      id: string;
+      username: string;
+      avatarUrl?: string | null;
+      reputation: number;
+    } & User_Key;
+    reports_on_access: ({
+      id: UUIDString;
+      reporterName: string;
+      blockerType: string;
+      blockerName: string;
+      description: string;
+      hasIllegalFee: boolean;
+      feeAmount?: number | null;
+      score: number;
+      createdAt: DateString;
+      user?: {
+        id: string;
+        username: string;
+        avatarUrl?: string | null;
+        reputation: number;
+      } & User_Key;
+    } & Report_Key)[];
+  } & Access_Key)[];
+}
+
+export interface GetBeachDetailsVariables {
+  id: UUIDString;
+}
+
+export interface GetCommentsForBeachData {
+  comments: ({
+    id: UUIDString;
+    text: string;
+    createdAt: DateString;
+    user: {
+      id: string;
+      username: string;
+      avatarUrl?: string | null;
+      reputation: number;
+    } & User_Key;
+  } & Comment_Key)[];
+}
+
+export interface GetCommentsForBeachVariables {
+  beachId: UUIDString;
+}
+
+export interface GetUserData {
+  user?: {
+    id: string;
+    username: string;
+    avatarUrl?: string | null;
+    bio?: string | null;
+    reputation: number;
+    createdAt: DateString;
+  } & User_Key;
+}
+
+export interface GetUserVariables {
+  id: string;
+}
+
+export interface ListBeachesData {
+  beaches: ({
+    id: UUIDString;
+    name: string;
+    state: string;
+    latitude: number;
+    longitude: number;
+    boundaryPolygon?: unknown | null;
+    images?: unknown | null;
+    createdAt: DateString;
+    user?: {
+      id: string;
+      username: string;
+      avatarUrl?: string | null;
+      reputation: number;
+    } & User_Key;
+    accesses_on_beach: ({
       id: UUIDString;
       name: string;
       latitude: number;
@@ -161,104 +267,15 @@ export interface GetBeachDetailsData {
         avatarUrl?: string | null;
         reputation: number;
       } & User_Key;
-        reports_on_access: ({
-          id: UUIDString;
-          reporterName: string;
-          blockerType: string;
-          blockerName: string;
-          description: string;
-          hasIllegalFee: boolean;
-          feeAmount?: number | null;
-          score: number;
-          createdAt: DateString;
-          user?: {
-            id: string;
-            username: string;
-            avatarUrl?: string | null;
-            reputation: number;
-          } & User_Key;
-        } & Report_Key)[];
-    } & Access_Key)[];
-}
-
-export interface GetBeachDetailsVariables {
-  id: UUIDString;
-}
-
-export interface GetCommentsForBeachData {
-  comments: ({
-    id: UUIDString;
-    text: string;
-    createdAt: DateString;
-    user: {
-      id: string;
-      username: string;
-      avatarUrl?: string | null;
-      reputation: number;
-    } & User_Key;
-  } & Comment_Key)[];
-}
-
-export interface GetCommentsForBeachVariables {
-  beachId: UUIDString;
-}
-
-export interface GetUserData {
-  user?: {
-    id: string;
-    username: string;
-    avatarUrl?: string | null;
-    reputation: number;
-    createdAt: DateString;
-  } & User_Key;
-}
-
-export interface GetUserVariables {
-  id: string;
-}
-
-export interface ListBeachesData {
-  beaches: ({
-    id: UUIDString;
-    name: string;
-    state: string;
-    latitude: number;
-    longitude: number;
-    boundaryPolygon?: unknown | null;
-    images?: unknown | null;
-    createdAt: DateString;
-    user?: {
-      id: string;
-      username: string;
-      avatarUrl?: string | null;
-      reputation: number;
-    } & User_Key;
-      accesses_on_beach: ({
+      reports_on_access: ({
         id: UUIDString;
-        name: string;
-        latitude: number;
-        longitude: number;
-        trailGeometry?: unknown | null;
-        images?: unknown | null;
-        pets: boolean;
-        shade: boolean;
-        showers: boolean;
-        parking: boolean;
-        security: boolean;
-        ramps: boolean;
-        wheelchair: boolean;
-        parkingReserved: boolean;
-        alcoholAllowed: boolean;
-        campingAllowed: boolean;
-        feeRequired: boolean;
-        wifi: boolean;
-        cellular4G: boolean;
+        reporterName: string;
         blockerType: string;
-        blockerName?: string | null;
-        blockerDescription?: string | null;
-        illegalFeeAmount: number;
-        reputation: number;
-        isPendingCuration: boolean;
+        blockerName: string;
+        description: string;
+        hasIllegalFee: boolean;
+        feeAmount?: number | null;
+        score: number;
         createdAt: DateString;
         user?: {
           id: string;
@@ -266,24 +283,8 @@ export interface ListBeachesData {
           avatarUrl?: string | null;
           reputation: number;
         } & User_Key;
-          reports_on_access: ({
-            id: UUIDString;
-            reporterName: string;
-            blockerType: string;
-            blockerName: string;
-            description: string;
-            hasIllegalFee: boolean;
-            feeAmount?: number | null;
-            score: number;
-            createdAt: DateString;
-            user?: {
-              id: string;
-              username: string;
-              avatarUrl?: string | null;
-              reputation: number;
-            } & User_Key;
-          } & Report_Key)[];
-      } & Access_Key)[];
+      } & Report_Key)[];
+    } & Access_Key)[];
   } & Beach_Key)[];
 }
 
@@ -332,6 +333,7 @@ export interface UpsertUserVariables {
   id: string;
   username: string;
   avatarUrl?: string | null;
+  bio?: string | null;
   reputation: number;
 }
 
@@ -469,8 +471,8 @@ interface ListBeachesRef {
 }
 export const listBeachesRef: ListBeachesRef;
 
-export function listBeaches(): QueryPromise<ListBeachesData, undefined>;
-export function listBeaches(dc: DataConnect): QueryPromise<ListBeachesData, undefined>;
+export function listBeaches(options?: ExecuteQueryOptions): QueryPromise<ListBeachesData, undefined>;
+export function listBeaches(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListBeachesData, undefined>;
 
 interface GetBeachDetailsRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -481,8 +483,8 @@ interface GetBeachDetailsRef {
 }
 export const getBeachDetailsRef: GetBeachDetailsRef;
 
-export function getBeachDetails(vars: GetBeachDetailsVariables): QueryPromise<GetBeachDetailsData, GetBeachDetailsVariables>;
-export function getBeachDetails(dc: DataConnect, vars: GetBeachDetailsVariables): QueryPromise<GetBeachDetailsData, GetBeachDetailsVariables>;
+export function getBeachDetails(vars: GetBeachDetailsVariables, options?: ExecuteQueryOptions): QueryPromise<GetBeachDetailsData, GetBeachDetailsVariables>;
+export function getBeachDetails(dc: DataConnect, vars: GetBeachDetailsVariables, options?: ExecuteQueryOptions): QueryPromise<GetBeachDetailsData, GetBeachDetailsVariables>;
 
 interface GetUserRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -493,8 +495,8 @@ interface GetUserRef {
 }
 export const getUserRef: GetUserRef;
 
-export function getUser(vars: GetUserVariables): QueryPromise<GetUserData, GetUserVariables>;
-export function getUser(dc: DataConnect, vars: GetUserVariables): QueryPromise<GetUserData, GetUserVariables>;
+export function getUser(vars: GetUserVariables, options?: ExecuteQueryOptions): QueryPromise<GetUserData, GetUserVariables>;
+export function getUser(dc: DataConnect, vars: GetUserVariables, options?: ExecuteQueryOptions): QueryPromise<GetUserData, GetUserVariables>;
 
 interface GetCommentsForBeachRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -505,6 +507,6 @@ interface GetCommentsForBeachRef {
 }
 export const getCommentsForBeachRef: GetCommentsForBeachRef;
 
-export function getCommentsForBeach(vars: GetCommentsForBeachVariables): QueryPromise<GetCommentsForBeachData, GetCommentsForBeachVariables>;
-export function getCommentsForBeach(dc: DataConnect, vars: GetCommentsForBeachVariables): QueryPromise<GetCommentsForBeachData, GetCommentsForBeachVariables>;
+export function getCommentsForBeach(vars: GetCommentsForBeachVariables, options?: ExecuteQueryOptions): QueryPromise<GetCommentsForBeachData, GetCommentsForBeachVariables>;
+export function getCommentsForBeach(dc: DataConnect, vars: GetCommentsForBeachVariables, options?: ExecuteQueryOptions): QueryPromise<GetCommentsForBeachData, GetCommentsForBeachVariables>;
 
