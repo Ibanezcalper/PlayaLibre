@@ -1,7 +1,7 @@
 # Queries for PlayaLibre (PostgreSQL)
 
 # List all beaches along with their accesses, reports and creators
-query ListBeaches @auth(level: PUBLIC) {
+query ListBeaches @auth(level: PUBLIC, insecureReason: "Read-only access to map beaches for everyone") {
   beaches {
     id
     name
@@ -72,7 +72,7 @@ query ListBeaches @auth(level: PUBLIC) {
 }
 
 # Get detailed beach along with its accesses
-query GetBeachDetails($id: UUID!) @auth(level: PUBLIC) {
+query GetBeachDetails($id: UUID!) @auth(level: PUBLIC, insecureReason: "Read-only access for guests to explore beach details") {
   beach(id: $id) {
     id
     name
@@ -143,7 +143,7 @@ query GetBeachDetails($id: UUID!) @auth(level: PUBLIC) {
 }
 
 # Get user details
-query GetUser($id: String!) @auth(level: PUBLIC) {
+query GetUser($id: String!) @auth(level: PUBLIC, insecureReason: "Read-only access to view public profiles of other users") {
   user(id: $id) {
     id
     username
@@ -155,7 +155,7 @@ query GetUser($id: String!) @auth(level: PUBLIC) {
 }
 
 # Get all comments for a beach
-query GetCommentsForBeach($beachId: UUID!) @auth(level: PUBLIC) {
+query GetCommentsForBeach($beachId: UUID!) @auth(level: PUBLIC, insecureReason: "Read-only access for guests to read beach comments") {
   comments(where: { beachId: { eq: $beachId } }, orderBy: [{ createdAt: DESC }]) {
     id
     text

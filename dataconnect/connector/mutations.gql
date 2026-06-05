@@ -129,7 +129,7 @@ mutation UpdateAccessCuration(
 mutation UpdateReportScore(
   $id: UUID!
   $score: Int!
-) @auth(level: USER) {
+) @auth(level: USER, insecureReason: "Registered users can vote up or down on report validity") {
   report_update(
     id: $id,
     data: {
@@ -141,7 +141,7 @@ mutation UpdateReportScore(
 # Delete a report
 mutation DeleteReport(
   $id: UUID!
-) @auth(level: USER) {
+) @auth(level: USER, insecureReason: "Registered users can trigger deletion of reports with low score") {
   report_delete(
     id: $id
   )
@@ -168,7 +168,7 @@ mutation UpsertUser(
 mutation UpdateUserReputation(
   $id: String!
   $reputation: Int!
-) @auth(level: USER) {
+) @auth(level: USER, insecureReason: "Registered users can vote and adjust user reputation") {
   user_update(
     id: $id
     data: {
@@ -193,7 +193,7 @@ mutation CreateComment(
 # Delete a comment
 mutation DeleteComment(
   $id: UUID!
-) @auth(level: USER) {
+) @auth(level: USER, insecureReason: "Allows comment deletion for owner or moderator verification") {
   comment_delete(
     id: $id
   )
