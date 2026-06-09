@@ -108,11 +108,18 @@
   pointer-events: none;
 }
 
-/* Leaflet needs an explicit height; mobile flex layouts often resolve to 0px on first paint */
+/* Leaflet must fill its positioned parent — percentage heights fail inside flex without explicit pane height */
 .leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100%;
+  z-index: 1;
+}
+
+.leaflet-pane,
+.leaflet-map-pane,
+.leaflet-tile-pane {
   width: 100%;
   height: 100%;
-  min-height: 200px;
-  z-index: 1;
 }
 

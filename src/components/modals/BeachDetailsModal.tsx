@@ -176,7 +176,8 @@ export function BeachDetailsModal({
                   zoom={15}
                   zoomControl={false}
                   {...({ tap: false } as any)}
-                  className="w-full h-full min-h-[288px]"
+                  style={{ height: '100%', width: '100%' }}
+                  className="absolute inset-0 w-full h-full"
                 >
                   <MapResizer watchKey={`${selectedBeach.id}-${isOpen}`} />
                   <TileLayer

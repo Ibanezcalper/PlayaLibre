@@ -19,12 +19,13 @@ export function MapResizer({ watchKey }: MapResizerProps) {
     const timers = [100, 300, 600].map((ms) => setTimeout(invalidate, ms));
 
     const container = map.getContainer();
+    const sizeTarget = container.parentElement ?? container;
     const resizeObserver =
       typeof ResizeObserver !== 'undefined'
         ? new ResizeObserver(() => invalidate())
         : null;
 
-    resizeObserver?.observe(container);
+    resizeObserver?.observe(sizeTarget);
 
     return () => {
       timers.forEach(clearTimeout);

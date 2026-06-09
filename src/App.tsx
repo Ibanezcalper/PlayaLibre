@@ -2104,10 +2104,10 @@ export default function App() {
               mobileSection={mobileSection}
             />
 
-            {/* Map pane */}
-            <div className={`flex-1 relative flex flex-col rounded-2xl bg-[#151c14] border border-gray-200 overflow-hidden shadow ${
-              mobileSection === 'list' ? 'hidden lg:flex' : 'flex'
-            }`} style={{ minHeight: '500px' }}>
+            {/* Map pane — explicit height on mobile so Leaflet fills the container (flex-1 alone leaves a ~80px tile strip) */}
+            <div className={`relative rounded-2xl bg-[#151c14] border border-gray-200 overflow-hidden shadow w-full h-[55vh] min-h-[420px] max-h-[640px] lg:flex-1 lg:h-auto lg:max-h-none lg:min-h-[600px] ${
+              mobileSection === 'list' ? 'hidden lg:block' : 'block'
+            }`}>
               
               {/* Toggle layer */}
               <div className="absolute top-4 left-4 z-[1000] flex flex-col gap-2">
@@ -2183,8 +2183,8 @@ export default function App() {
                 )}
               </div>
 
-              {/* MapContainer — mount only when the map pane is visible (avoids 0×0 Leaflet init on mobile) */}
-              <div className="flex-1 w-full min-h-[400px] h-full relative z-10">
+              {/* MapContainer — absolute fill so Leaflet always matches the pane height */}
+              <div className="absolute inset-0 z-10">
                 {(!isMobile || mobileSection === 'map') && (
                   <MapContainer
                     key={`main-map-${mobileSection}`}
@@ -2196,7 +2196,8 @@ export default function App() {
                     zoom={mapZoom}
                     zoomControl={false}
                     {...({ tap: false } as any)}
-                    className="w-full h-full min-h-[400px]"
+                    style={{ height: '100%', width: '100%' }}
+                    className="w-full h-full"
                   >
                     <MapResizer watchKey={mobileSection} />
                     <ChangeMapView 
