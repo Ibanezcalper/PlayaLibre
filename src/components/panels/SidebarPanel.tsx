@@ -90,6 +90,7 @@ export function SidebarPanel({
                       onClick={() => setLightboxImage(img)}
                       className="w-14 h-14 object-cover rounded-lg border border-gray-250 cursor-pointer hover:opacity-90 flex-shrink-0"
                       alt="Acceso"
+                      decoding="async"
                     />
                   ))}
                 </div>
@@ -301,6 +302,7 @@ export function SidebarPanel({
                       onClick={() => setLightboxImage(img)}
                       className="w-14 h-14 object-cover rounded-lg border border-gray-250 cursor-pointer hover:opacity-90 flex-shrink-0"
                       alt="Playa"
+                      decoding="async"
                     />
                   ))}
                 </div>

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { X, MessageSquare, Send, Camera } from 'lucide-react';
 import { MapContainer, TileLayer, ZoomControl, Marker, Popup, Polygon } from 'react-leaflet';
 import * as L from 'leaflet';
@@ -51,6 +51,23 @@ export function BeachDetailsModal({
   setMapCenter,
   viewUserProfile
 }: BeachDetailsModalProps) {
+  const [detailMapReady, setDetailMapReady] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setDetailMapReady(false);
+      return;
+    }
+    let timer: ReturnType<typeof setTimeout>;
+    const frame = requestAnimationFrame(() => {
+      timer = setTimeout(() => setDetailMapReady(true), 80);
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      clearTimeout(timer);
+    };
+  }, [isOpen, selectedBeach?.id]);
+
   if (!isOpen || !selectedBeach) return null;
 
   const createAccessIcon = (isBlocked: boolean, isSelected: boolean) => {
@@ -148,7 +165,8 @@ export function BeachDetailsModal({
             {/* Local Zoom Map */}
             <div>
               <h4 className="font-bold text-gray-900 mb-2">Ubicación y accesos en el mapa</h4>
-              <div className="w-full h-72 rounded-2xl border border-gray-300 overflow-hidden shadow-sm bg-[#151c14] relative z-10">
+              <div className="w-full h-72 min-h-[288px] rounded-2xl border border-gray-300 overflow-hidden shadow-sm bg-[#151c14] relative z-10">
+                {detailMapReady ? (
                 <MapContainer
                   key={`detail-map-${selectedBeach.id}`}
                   center={[
@@ -158,9 +176,9 @@ export function BeachDetailsModal({
                   zoom={15}
                   zoomControl={false}
                   {...({ tap: false } as any)}
-                  className="w-full h-full"
+                  className="w-full h-full min-h-[288px]"
                 >
-                  <MapResizer />
+                  <MapResizer watchKey={`${selectedBeach.id}-${isOpen}`} />
                   <TileLayer
                     attribution='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
                     url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
@@ -203,6 +221,11 @@ export function BeachDetailsModal({
                     );
                   })}
                 </MapContainer>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-500 text-xs">
+                    Cargando vista previa del mapa…
+                  </div>
+                )}
               </div>
             </div>
 
@@ -268,14 +291,22 @@ export function BeachDetailsModal({
                 </div>
               ) : (
                 <div className="bg-white p-4 rounded-2xl border border-gray-200 space-y-3">
-                  <div className="grid grid-cols-4 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {visiblePhotos.map((photo, idx) => (
                       <div
                         key={idx}
                         onClick={() => setLightboxImage(photo)}
                         className="aspect-square rounded-xl overflow-hidden border border-gray-300 shadow-sm cursor-pointer hover:opacity-90 hover:scale-102 transition-all animate-fade-in"
                       >
-                        <img src={photo} className="w-full h-full object-cover" alt="Playa" />
+                        <img
+                          src={photo}
+                          className="w-full h-full object-cover"
+                          alt="Playa"
+                          decoding="async"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }}
+                        />
                       </div>
                     ))}
                   </div>

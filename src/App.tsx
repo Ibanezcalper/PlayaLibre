@@ -104,7 +104,9 @@ L.Icon.Default.mergeOptions({
 });
 
 export default function App() {
-  const [mobileSection, setMobileSection] = useState<'list' | 'map'>('list');
+  const [mobileSection, setMobileSection] = useState<'list' | 'map'>(() =>
+    typeof window !== 'undefined' && window.innerWidth < 1024 ? 'map' : 'list'
+  );
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
   const [isHighReputationUser, setIsHighReputationUser] = useState(false);
 
@@ -2181,10 +2183,11 @@ export default function App() {
                 )}
               </div>
 
-              {/* MapContainer */}
-              <div className="flex-1 w-full h-full relative z-10">
-                {(!isMobile || mobileSection === 'map') ? (
+              {/* MapContainer — mount only when the map pane is visible (avoids 0×0 Leaflet init on mobile) */}
+              <div className="flex-1 w-full min-h-[400px] h-full relative z-10">
+                {(!isMobile || mobileSection === 'map') && (
                   <MapContainer
+                    key={`main-map-${mobileSection}`}
                     center={
                       (mapCenter && typeof mapCenter[0] === 'number' && !isNaN(mapCenter[0]) && typeof mapCenter[1] === 'number' && !isNaN(mapCenter[1])) 
                         ? mapCenter 
@@ -2193,9 +2196,9 @@ export default function App() {
                     zoom={mapZoom}
                     zoomControl={false}
                     {...({ tap: false } as any)}
-                    className="w-full h-full"
+                    className="w-full h-full min-h-[400px]"
                   >
-                    <MapResizer />
+                    <MapResizer watchKey={mobileSection} />
                     <ChangeMapView 
                       center={
                         (mapCenter && typeof mapCenter[0] === 'number' && !isNaN(mapCenter[0]) && typeof mapCenter[1] === 'number' && !isNaN(mapCenter[1])) 
@@ -2374,10 +2377,6 @@ export default function App() {
                     )}
 
                   </MapContainer>
-                ) : (
-                  <div className="w-full h-full bg-[#151c14] flex flex-col items-center justify-center text-gray-400 gap-2">
-                    <p className="text-xs font-semibold">Cargando mapa interactivo...</p>
-                  </div>
                 )}
               </div>
 

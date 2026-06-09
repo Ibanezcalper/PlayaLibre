@@ -1,19 +1,36 @@
 import { useEffect } from 'react';
 import { useMap } from 'react-leaflet';
 
-export function MapResizer() {
-  const map = useMap();
-  useEffect(() => {
-    // Invalidate size immediately on mount
-    map.invalidateSize();
-    
-    // Also invalidate size after a short delay to allow browser layout reflow to finish
-    const timer = setTimeout(() => {
-      map.invalidateSize();
-    }, 200);
+interface MapResizerProps {
+  /** Re-run invalidateSize when this value changes (tab switch, modal open, etc.) */
+  watchKey?: string | number | boolean;
+}
 
-    return () => clearTimeout(timer);
-  }, [map]);
+export function MapResizer({ watchKey }: MapResizerProps) {
+  const map = useMap();
+
+  useEffect(() => {
+    const invalidate = () => {
+      map.invalidateSize({ animate: false });
+    };
+
+    invalidate();
+
+    const timers = [100, 300, 600].map((ms) => setTimeout(invalidate, ms));
+
+    const container = map.getContainer();
+    const resizeObserver =
+      typeof ResizeObserver !== 'undefined'
+        ? new ResizeObserver(() => invalidate())
+        : null;
+
+    resizeObserver?.observe(container);
+
+    return () => {
+      timers.forEach(clearTimeout);
+      resizeObserver?.disconnect();
+    };
+  }, [map, watchKey]);
 
   return null;
 }
