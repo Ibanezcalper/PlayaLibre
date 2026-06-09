@@ -68,26 +68,9 @@ export function BeachDetailsModal({
     };
   }, [isOpen, selectedBeach?.id]);
 
-  if (!isOpen || !selectedBeach) return null;
-
-  const createAccessIcon = (isBlocked: boolean, isSelected: boolean) => {
-    const color = isSelected ? '#F26522' : isBlocked ? '#ef4444' : '#10b981';
-    const shadowColor = isSelected ? 'rgba(242,101,34,0.4)' : isBlocked ? 'rgba(239,68,68,0.4)' : 'rgba(16,185,129,0.4)';
-    return L.divIcon({
-      html: `<div class="w-6 h-6 rounded-full border-2 border-white flex items-center justify-center shadow-lg transition-transform hover:scale-110" style="background-color: ${color}; box-shadow: 0 0 10px ${shadowColor};">
-        <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25s-7.5-4.108-7.5-11.25a7.5 7.5 0 1115 0z" />
-        </svg>
-      </div>`,
-      className: '',
-      iconSize: [24, 24],
-      iconAnchor: [12, 24],
-      popupAnchor: [0, -24]
-    });
-  };
-
   const timelineData = useMemo(() => {
+    if (!selectedBeach) return [];
+
     const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
     const data: Record<string, { month: string; illegalFees: number; insecurity: number; blockages: number; other: number; sortKey: number }> = {};
     
@@ -128,6 +111,7 @@ export function BeachDetailsModal({
   }, [selectedBeach]);
 
   const allPhotos = useMemo(() => {
+    if (!selectedBeach) return [];
     return [
       ...(selectedBeach.images || []),
       ...selectedBeach.accesses.flatMap(a => a.images || [])
@@ -137,6 +121,25 @@ export function BeachDetailsModal({
   const visiblePhotos = useMemo(() => {
     return allPhotos.slice(0, visibleImagesLimit);
   }, [allPhotos, visibleImagesLimit]);
+
+  if (!isOpen || !selectedBeach) return null;
+
+  const createAccessIcon = (isBlocked: boolean, isSelected: boolean) => {
+    const color = isSelected ? '#F26522' : isBlocked ? '#ef4444' : '#10b981';
+    const shadowColor = isSelected ? 'rgba(242,101,34,0.4)' : isBlocked ? 'rgba(239,68,68,0.4)' : 'rgba(16,185,129,0.4)';
+    return L.divIcon({
+      html: `<div class="w-6 h-6 rounded-full border-2 border-white flex items-center justify-center shadow-lg transition-transform hover:scale-110" style="background-color: ${color}; box-shadow: 0 0 10px ${shadowColor};">
+        <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25s-7.5-4.108-7.5-11.25a7.5 7.5 0 1115 0z" />
+        </svg>
+      </div>`,
+      className: '',
+      iconSize: [24, 24],
+      iconAnchor: [12, 24],
+      popupAnchor: [0, -24]
+    });
+  };
 
   return (
     <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
