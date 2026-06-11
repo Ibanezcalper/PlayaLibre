@@ -21,8 +21,7 @@ interface SidebarPanelProps {
   handleCurationVerify: (accessId: string, actionType: 'resolve_conflict' | 'verify_public') => void;
   setIsReportOpen: (open: boolean) => void;
   handleReportVote: (accessId: string, reportId: string, diff: number) => void;
-  setIsNewAccessOpen: (open: boolean) => void;
-  setNewAccessBeachId: (id: string) => void;
+  onRegisterAccess: (beachId: string) => void;
   viewUserProfile: (userId: string) => void;
   setLightboxImage: (img: string | null) => void;
   mobileSection: 'list' | 'map';
@@ -44,8 +43,7 @@ export function SidebarPanel({
   handleCurationVerify,
   setIsReportOpen,
   handleReportVote,
-  setIsNewAccessOpen,
-  setNewAccessBeachId,
+  onRegisterAccess,
   viewUserProfile,
   setLightboxImage,
   mobileSection
@@ -361,10 +359,7 @@ export function SidebarPanel({
                   <div className="py-8 text-center text-gray-400 bg-gray-50 border border-dashed border-gray-250 rounded-xl text-[10px] space-y-2">
                     <p>No hay accesos peatonales registrados para esta playa pública.</p>
                     <button
-                      onClick={() => {
-                        setNewAccessBeachId(selectedBeach.id);
-                        setIsNewAccessOpen(true);
-                      }}
+                      onClick={() => onRegisterAccess(selectedBeach.id)}
                       className="px-3 py-1.5 bg-gray-905 text-white rounded-lg font-bold text-[9.5px]"
                     >
                       Registrar acceso

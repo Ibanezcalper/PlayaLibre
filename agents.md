@@ -1,5 +1,7 @@
 # Playalibre: constitución y arquitectura del proyecto
 
+> **Contexto reciente de sesión:** ver [`resume.md`](./resume.md) (bugs móvil/Leaflet, guía+tour, commits pendientes).
+
 ## 1. Gobernanza y calidad de datos colectiva
 - **Dibujo de polígonos (Crowd-Drawing):** Los usuarios delimitan playas dibujando polígonos interactivos sobre Leaflet (OpenStreetMap).
 - **Accesos públicos:** Múltiples caminos peatonales asociados a cada playa, detallando obstrucciones físicas (ej. rejas de hoteles, condominios) y servicios (estacionamiento, regaderas, rampas de accesibilidad).
@@ -53,3 +55,11 @@
 ## 5. Gobernanza de skills de agentes
 - **Búsqueda y adición de skills:**
   - Cuando el usuario solicite información sobre una skill o requiera agregar una skill, el agente debe utilizar prioritariamente la skill de auto skills para buscar e integrar una skill externa existente del registro oficial, evitando la creación de una skill propia local desde cero.
+
+## 6. Guía de uso y onboarding (2026-06)
+
+- **Sección estática:** `#guide-section` entre Propósito y `#explorer-section`. Copy formal; secuencia playa → acceso → consulta.
+- **Tour guiado:** `OnboardingTour` con spotlight, omitible; targets con prefijo `guide-target-*`.
+- **Preferencias:** `useGuidePreferences` + `src/constants/guideSteps.ts`; versión storage `v1`.
+- **Móvil / Leaflet:** panel mapa con altura explícita (`h-[55vh]`), contenedor mapa `absolute inset-0`, `MapResizer` observa padre. Pestaña móvil por defecto: mapa.
+- **Regla hooks:** en modales con early return, **todos** los hooks antes del `return null` (evitar React #310).

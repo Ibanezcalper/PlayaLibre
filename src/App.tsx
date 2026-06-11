@@ -57,7 +57,7 @@ import {
 } from './constants';
 
 // Utilities
-import { calculateDistance } from './utils/geo';
+import { calculateDistance, detectCoastalState, polygonCentroid } from './utils/geo';
 import { hashSHA1 } from './utils/crypto';
 import { mapDbBeachToFrontend } from './utils/mappers';
 
@@ -75,9 +75,15 @@ import { EmailVerificationPendingModal } from './components/modals/EmailVerifica
 import { ProfileSetupModal } from './components/modals/ProfileSetupModal';
 import { UserProfileViewModal } from './components/modals/UserProfileViewModal';
 import { ReportBlockerModal } from './components/modals/ReportBlockerModal';
-import { NewBeachModal } from './components/modals/NewBeachModal';
-import { NewAccessModal } from './components/modals/NewAccessModal';
+import { NewBeachModal, type BeachFormStep } from './components/modals/NewBeachModal';
+import { NewAccessModal, type AccessFormStep } from './components/modals/NewAccessModal';
 import { BeachDetailsModal } from './components/modals/BeachDetailsModal';
+
+// Guide / onboarding
+import { PlatformGuideSection } from './components/guide/PlatformGuideSection';
+import { OnboardingTour } from './components/guide/OnboardingTour';
+import { GuideFirstVisitBanner } from './components/guide/GuideFirstVisitBanner';
+import { useGuidePreferences } from './hooks/useGuidePreferences';
 
 // Offline Sync
 import {
@@ -108,6 +114,8 @@ export default function App() {
     typeof window !== 'undefined' && window.innerWidth < 1024 ? 'map' : 'list'
   );
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
+  const [isTourOpen, setIsTourOpen] = useState(false);
+  const { bannerDismissed, tourCompleted, dismissBanner, completeTour, skipTour } = useGuidePreferences();
   const [isHighReputationUser, setIsHighReputationUser] = useState(false);
 
   // Sync state & connection queues
@@ -186,6 +194,9 @@ export default function App() {
   // Form State - Beach Creation
   const [newBeachName, setNewBeachName] = useState('');
   const [newBeachState, setNewBeachState] = useState('Oaxaca');
+  const [beachFormStep, setBeachFormStep] = useState<BeachFormStep>('draw');
+  const [stateAutoDetected, setStateAutoDetected] = useState(false);
+  const [accessFormStep, setAccessFormStep] = useState<AccessFormStep>('map');
 
   // Form State - Access Creation
   const newAccessPolicy = {
@@ -376,11 +387,11 @@ export default function App() {
       if (pendingAuthAction === 'beach') {
         const el = document.getElementById('explorer-section');
         if (el) el.scrollIntoView({ behavior: 'smooth' });
-        setIsNewBeachOpen(true);
+        openNewBeachFlow();
       } else if (pendingAuthAction === 'access') {
         const el = document.getElementById('explorer-section');
         if (el) el.scrollIntoView({ behavior: 'smooth' });
-        setIsNewAccessOpen(true);
+        openNewAccessFlow();
       }
       setPendingAuthAction(null);
       setIsAuthPromptOpen(false);
@@ -1118,6 +1129,28 @@ export default function App() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Guide tour: switch mobile tabs when spotlight targets list or map
+  useEffect(() => {
+    const showMap = () => setMobileSection('map');
+    const showList = () => setMobileSection('list');
+    window.addEventListener('playalibre:guide-show-map', showMap);
+    window.addEventListener('playalibre:guide-show-list', showList);
+    return () => {
+      window.removeEventListener('playalibre:guide-show-map', showMap);
+      window.removeEventListener('playalibre:guide-show-list', showList);
+    };
+  }, []);
+
+  const startGuideTour = () => {
+    document.getElementById('explorer-section')?.scrollIntoView({ behavior: 'smooth' });
+    window.setTimeout(() => setIsTourOpen(true), 450);
+  };
+
+  const scrollToGuideSection = () => {
+    dismissBanner();
+    document.getElementById('guide-section')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   const showToast = (text: string, type: 'success' | 'warn' | 'info') => {
     setToastMessage({ text, type });
     setTimeout(() => setToastMessage(null), 4000);
@@ -1354,6 +1387,70 @@ export default function App() {
   };
 
   // Submit a new beach
+  const openNewBeachFlow = () => {
+    setBeachFormStep('draw');
+    setStateAutoDetected(false);
+    setDrawingPoints([]);
+    setDrawMode(null);
+    setIsFormMinimized(false);
+    setIsNewBeachOpen(true);
+  };
+
+  const startBeachDrawing = () => {
+    setIsNewBeachOpen(false);
+    setIsFormMinimized(true);
+    setDrawMode('beach');
+    const el = document.getElementById('explorer-section');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const undoLastBeachPoint = () => {
+    setDrawingPoints((prev) => {
+      if (prev.length === 0) return prev;
+      const next = prev.slice(0, -1);
+      showToast(
+        next.length === 0 ? 'Polígono vacío.' : `Último punto eliminado (${next.length} vértices).`,
+        'info'
+      );
+      return next;
+    });
+  };
+
+  const clearBeachPolygon = () => {
+    setDrawingPoints([]);
+    showToast('Polígono eliminado. Puede volver a trazarlo.', 'info');
+  };
+
+  const finishBeachDrawing = () => {
+    if (drawingPoints.length < 3) {
+      showToast('Delimite la playa con al menos 3 puntos.', 'warn');
+      return;
+    }
+    const [lat, lng] = polygonCentroid(drawingPoints);
+    setNewBeachState(detectCoastalState(lat, lng));
+    setStateAutoDetected(true);
+    setBeachFormStep('details');
+    setIsFormMinimized(false);
+    setDrawMode(null);
+    setIsNewBeachOpen(true);
+  };
+
+  const backToBeachDrawing = () => {
+    setBeachFormStep('draw');
+    setStateAutoDetected(false);
+    setIsNewBeachOpen(false);
+    setIsFormMinimized(true);
+    setDrawMode('beach');
+    const el = document.getElementById('explorer-section');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const closeNewBeachFlow = () => {
+    setIsNewBeachOpen(false);
+    setDrawMode(null);
+    setIsFormMinimized(false);
+  };
+
   const submitNewBeach = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userProfile) {
@@ -1361,25 +1458,16 @@ export default function App() {
       return;
     }
     if (!newBeachName) return;
+    if (drawingPoints.length < 3) {
+      showToast('Debe delimitar la playa con al menos 3 puntos en el mapa.', 'warn');
+      setBeachFormStep('draw');
+      return;
+    }
 
     const beachId = 'beach-' + Math.random().toString(36).substr(2, 9);
-    
-    const finalPolygon: [number, number][] = drawingPoints.length > 2 
-      ? drawingPoints 
-      : [
-          [15.8622, -97.0789],
-          [15.8626, -97.0780],
-          [15.8612, -97.0776],
-          [15.8610, -97.0785]
-        ];
 
-    let totalLat = 0, totalLng = 0;
-    finalPolygon.forEach(([lat, lng]) => {
-      totalLat += lat;
-      totalLng += lng;
-    });
-    const avgLat = Number((totalLat / finalPolygon.length).toFixed(6));
-    const avgLng = Number((totalLng / finalPolygon.length).toFixed(6));
+    const finalPolygon: [number, number][] = drawingPoints;
+    const [avgLat, avgLng] = polygonCentroid(finalPolygon);
 
     const beachData: OfflineBeach = {
       id: beachId,
@@ -1436,10 +1524,82 @@ export default function App() {
     setNewBeachImages([]);
     setDrawingPoints([]);
     setDrawMode(null);
+    setBeachFormStep('draw');
+    setStateAutoDetected(false);
     setIsNewBeachOpen(false);
   };
 
   // Submit a new access point linked to a beach
+  const openNewAccessFlow = (beachId?: string) => {
+    setAccessFormStep('map');
+    setPlacedPinCoordinates(null);
+    setTrailDrawingPoints([]);
+    setDrawMode(null);
+    setIsFormMinimized(false);
+    if (beachId) setNewAccessBeachId(beachId);
+    else setNewAccessBeachId('');
+    setIsNewAccessOpen(true);
+  };
+
+  const startAccessMapWork = () => {
+    setIsNewAccessOpen(false);
+    setIsFormMinimized(true);
+    setDrawMode('access_pin');
+    const el = document.getElementById('explorer-section');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const startAccessTrailDrawing = () => {
+    setDrawMode('trail');
+  };
+
+  const relocateAccessPin = () => {
+    setDrawMode('access_pin');
+  };
+
+  const undoLastTrailPoint = () => {
+    setTrailDrawingPoints((prev) => {
+      if (prev.length === 0) return prev;
+      const next = prev.slice(0, -1);
+      showToast(
+        next.length === 0 ? 'Sendero vacío.' : `Último punto eliminado (${next.length} vértices).`,
+        'info'
+      );
+      return next;
+    });
+  };
+
+  const clearAccessTrail = () => {
+    setTrailDrawingPoints([]);
+    showToast('Sendero eliminado. Puede volver a trazarlo.', 'info');
+  };
+
+  const finishAccessMapWork = () => {
+    if (!placedPinCoordinates) {
+      showToast('Debe fijar el punto de entrada en el mapa.', 'warn');
+      return;
+    }
+    setAccessFormStep('details');
+    setIsFormMinimized(false);
+    setDrawMode(null);
+    setIsNewAccessOpen(true);
+  };
+
+  const backToAccessMap = () => {
+    setAccessFormStep('map');
+    setIsNewAccessOpen(false);
+    setIsFormMinimized(true);
+    setDrawMode(placedPinCoordinates ? null : 'access_pin');
+    const el = document.getElementById('explorer-section');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const closeNewAccessFlow = () => {
+    setIsNewAccessOpen(false);
+    setDrawMode(null);
+    setIsFormMinimized(false);
+  };
+
   const submitNewAccess = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userProfile) {
@@ -1608,6 +1768,7 @@ export default function App() {
     setNewAccessAmenities({ pets: false, shade: false, showers: false, parking: false, security: false });
     setNewAccessAccessibility({ ramps: false, wheelchair: false, parkingReserved: false });
     setDrawMode(null);
+    setAccessFormStep('map');
     setIsNewAccessOpen(false);
   };
 
@@ -1620,8 +1781,11 @@ export default function App() {
       showToast(`Punto de playa agregado: [${latRounded}, ${lngRounded}]`, 'info');
     } else if (drawMode === 'access_pin') {
       setPlacedPinCoordinates([latRounded, lngRounded]);
-      showToast(`Ubicación de entrada fijada en: [${latRounded}, ${lngRounded}]`, 'info');
       setDrawMode(null);
+      showToast(
+        'Entrada fijada. Puede trazar el sendero o presionar «Continuar» en el mapa.',
+        'info'
+      );
     } else if (drawMode === 'trail') {
       setTrailDrawingPoints((prev) => [...prev, [latRounded, lngRounded]]);
       showToast(`Punto de sendero agregado: [${latRounded}, ${lngRounded}]`, 'info');
@@ -1711,6 +1875,16 @@ export default function App() {
               <a href="#about-us" className="font-sans text-[14px] text-[#1a1a1a] font-medium hover:opacity-60 transition-opacity">
                 Propósito
               </a>
+              <a
+                href="#guide-section"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById('guide-section')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="font-sans text-[14px] text-[#1a1a1a] font-medium hover:opacity-60 transition-opacity"
+              >
+                Guía de uso
+              </a>
               <a 
                 href="#explorer-section" 
                 onClick={(e) => {
@@ -1731,7 +1905,7 @@ export default function App() {
                   }
                   const el = document.getElementById('explorer-section');
                   if (el) el.scrollIntoView({ behavior: 'smooth' });
-                  setIsNewBeachOpen(true);
+                  openNewBeachFlow();
                 }}
                 className="font-sans text-[14px] text-[#1a1a1a] font-medium hover:opacity-60 transition-opacity pointer-events-auto"
               >
@@ -1746,7 +1920,7 @@ export default function App() {
                   }
                   const el = document.getElementById('explorer-section');
                   if (el) el.scrollIntoView({ behavior: 'smooth' });
-                  setIsNewAccessOpen(true);
+                  openNewAccessFlow();
                 }}
                 className="font-sans text-[14px] text-[#1a1a1a] font-medium hover:opacity-60 transition-opacity pointer-events-auto"
               >
@@ -1974,11 +2148,13 @@ export default function App() {
         </div>
       </section>
 
+      <PlatformGuideSection onStartTour={startGuideTour} tourCompleted={tourCompleted} />
+
       {/* SECTION 3: MAP AND REGISTER OF BEACHES */}
       <section id="explorer-section" className="relative bg-[#F5F5F5] pt-16 sm:pt-20 lg:pt-28 pb-16 sm:pb-20 lg:pb-28 border-t border-gray-200">
         <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+          <div id="guide-target-explorer-header" className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
             <div>
               <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 tracking-wide uppercase select-none">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
@@ -1991,13 +2167,14 @@ export default function App() {
             
             <div className="flex flex-wrap items-center gap-3">
               <button
+                id="guide-target-register-beach"
                 onClick={() => {
                   if (!userProfile) {
                     setPendingAuthAction('beach');
                     setIsAuthPromptOpen(true);
                     return;
                   }
-                  setIsNewBeachOpen(true);
+                  openNewBeachFlow();
                 }}
                 className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-gray-900 hover:bg-gray-800 text-white text-xs font-semibold transition-all shadow-sm"
               >
@@ -2005,6 +2182,7 @@ export default function App() {
                 <span>Registrar playa</span>
               </button>
               <button
+                id="guide-target-register-access"
                 onClick={() => {
                   if (!userProfile) {
                     setPendingAuthAction('access');
@@ -2015,7 +2193,7 @@ export default function App() {
                     showToast('Primero registra una playa en el sistema.', 'warn');
                     return;
                   }
-                  setIsNewAccessOpen(true);
+                  openNewAccessFlow();
                 }}
                 className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#0871E7] hover:bg-[#0762cb] text-white text-xs font-semibold transition-all shadow-sm"
               >
@@ -2056,7 +2234,7 @@ export default function App() {
           </div>
 
           {/* Mobile view selector */}
-          <div className="flex lg:hidden rounded-xl bg-gray-200 p-1 mb-4 select-none">
+          <div id="guide-target-mobile-tabs" className="flex lg:hidden rounded-xl bg-gray-200 p-1 mb-4 select-none">
             <button
               onClick={() => setMobileSection('list')}
               className={`flex-1 py-2.5 rounded-lg text-center text-xs font-semibold transition-all ${
@@ -2075,7 +2253,7 @@ export default function App() {
             </button>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-6 items-stretch min-h-[600px]">
+          <div id="guide-target-beach-list" className="flex flex-col lg:flex-row gap-6 items-stretch min-h-[600px]">
             
             {/* Sidebar list panel */}
             <SidebarPanel
@@ -2097,8 +2275,7 @@ export default function App() {
               handleCurationVerify={handleCurationVerify}
               setIsReportOpen={setIsReportOpen}
               handleReportVote={handleReportVote}
-              setIsNewAccessOpen={setIsNewAccessOpen}
-              setNewAccessBeachId={setNewAccessBeachId}
+              onRegisterAccess={openNewAccessFlow}
               viewUserProfile={viewUserProfile}
               setLightboxImage={setLightboxImage}
               mobileSection={mobileSection}
@@ -2107,7 +2284,7 @@ export default function App() {
             {/* Map pane — explicit height on mobile so Leaflet fills the container (flex-1 alone leaves a ~80px tile strip) */}
             <div className={`relative rounded-2xl bg-[#151c14] border border-gray-200 overflow-hidden shadow w-full h-[55vh] min-h-[420px] max-h-[640px] lg:flex-1 lg:h-auto lg:max-h-none lg:min-h-[600px] ${
               mobileSection === 'list' ? 'hidden lg:block' : 'block'
-            }`}>
+            }`} id="guide-target-map-pane">
               
               {/* Toggle layer */}
               <div className="absolute top-4 left-4 z-[1000] flex flex-col gap-2">
@@ -2130,52 +2307,120 @@ export default function App() {
                   </button>
                 </div>
 
-                {drawMode && (
-                  <div className="p-2 flex flex-col gap-2 rounded-xl bg-gray-950/90 backdrop-blur-sm border border-emerald-600/50 shadow max-w-[200px] text-[10px] text-white">
-                    <span className="font-semibold text-emerald-400">
+                {(drawMode ||
+                  (accessFormStep === 'map' && isFormMinimized && placedPinCoordinates && !drawMode)) && (
+                  <div
+                    className={`p-2 flex flex-col gap-2 rounded-xl bg-gray-950/90 backdrop-blur-sm shadow max-w-[220px] text-[10px] text-white ${
+                      drawMode === 'beach'
+                        ? 'border border-emerald-600/50'
+                        : 'border border-blue-500/50'
+                    }`}
+                  >
+                    <span
+                      className={`font-semibold ${
+                        drawMode === 'beach' ? 'text-emerald-400' : 'text-blue-400'
+                      }`}
+                    >
                       {drawMode === 'beach' && 'Dibujando límites de playa:'}
                       {drawMode === 'access_pin' && 'Fijando entrada del acceso:'}
                       {drawMode === 'trail' && 'Dibujando sendero a pie:'}
+                      {!drawMode && accessFormStep === 'map' && 'Entrada del acceso fijada:'}
                     </span>
                     <p className="text-[8.5px] text-gray-400">
                       {drawMode === 'beach' && 'Haz clic en el mapa para delinear el polígono territorial.'}
                       {drawMode === 'access_pin' && 'Haz clic en la entrada o reja del acceso.'}
                       {drawMode === 'trail' && 'Haz clic en el mapa para trazar el sendero de entrada.'}
+                      {!drawMode &&
+                        accessFormStep === 'map' &&
+                        'Puede trazar el sendero, reubicar la entrada o continuar al formulario.'}
                     </p>
                     {drawMode === 'beach' && (
-                      <div className="flex gap-1.5 items-center justify-between mt-1">
-                        <button
-                          onClick={() => submitNewBeach({ preventDefault: () => {} } as any)}
-                          disabled={drawingPoints.length < 3}
-                          className="px-2.5 py-1 bg-emerald-600 text-white rounded text-[8.5px] font-bold uppercase disabled:opacity-50"
-                        >
-                          Listo
-                        </button>
-                        <button
-                          onClick={() => setDrawingPoints([])}
-                          className="px-2 py-1 bg-gray-800 text-gray-300 rounded text-[8.5px] font-bold uppercase"
-                        >
-                          Limpiar
-                        </button>
+                      <div className="flex flex-col gap-1.5 mt-1">
+                        <p className="text-[8px] text-emerald-300/90">
+                          Vértices: {drawingPoints.length} (mín. 3)
+                        </p>
+                        <div className="flex flex-wrap gap-1">
+                          <button
+                            type="button"
+                            onClick={undoLastBeachPoint}
+                            disabled={drawingPoints.length === 0}
+                            className="px-2 py-1 bg-gray-800 text-gray-300 rounded text-[8px] font-bold uppercase disabled:opacity-40"
+                          >
+                            Deshacer
+                          </button>
+                          <button
+                            type="button"
+                            onClick={clearBeachPolygon}
+                            disabled={drawingPoints.length === 0}
+                            className="px-2 py-1 bg-gray-800 text-gray-300 rounded text-[8px] font-bold uppercase disabled:opacity-40"
+                          >
+                            Limpiar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={finishBeachDrawing}
+                            disabled={drawingPoints.length < 3}
+                            className="px-2.5 py-1 bg-emerald-600 text-white rounded text-[8px] font-bold uppercase disabled:opacity-50"
+                          >
+                            Continuar
+                          </button>
+                        </div>
                       </div>
                     )}
                     {drawMode === 'trail' && (
-                      <div className="flex gap-1.5 items-center justify-between mt-1">
+                      <div className="flex flex-col gap-1.5 mt-1">
+                        <p className="text-[8px] text-blue-300/90">
+                          Vértices: {trailDrawingPoints.length}
+                        </p>
+                        <div className="flex flex-wrap gap-1">
+                          <button
+                            type="button"
+                            onClick={undoLastTrailPoint}
+                            disabled={trailDrawingPoints.length === 0}
+                            className="px-2 py-1 bg-gray-800 text-gray-300 rounded text-[8px] font-bold uppercase disabled:opacity-40"
+                          >
+                            Deshacer
+                          </button>
+                          <button
+                            type="button"
+                            onClick={clearAccessTrail}
+                            disabled={trailDrawingPoints.length === 0}
+                            className="px-2 py-1 bg-gray-800 text-gray-300 rounded text-[8px] font-bold uppercase disabled:opacity-40"
+                          >
+                            Limpiar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={finishAccessMapWork}
+                            className="px-2.5 py-1 bg-blue-600 text-white rounded text-[8px] font-bold uppercase"
+                          >
+                            Continuar
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    {!drawMode && accessFormStep === 'map' && isFormMinimized && placedPinCoordinates && (
+                      <div className="flex flex-wrap gap-1 mt-1">
                         <button
-                          onClick={() => {
-                            setIsNewAccessOpen(true);
-                            setIsFormMinimized(false);
-                            setDrawMode(null);
-                          }}
-                          className="px-2.5 py-1 bg-blue-600 text-white rounded text-[8.5px] font-bold uppercase"
+                          type="button"
+                          onClick={startAccessTrailDrawing}
+                          className="px-2 py-1 bg-blue-700 text-white rounded text-[8px] font-bold uppercase"
                         >
-                          Guardar
+                          Trazar sendero
                         </button>
                         <button
-                          onClick={() => setTrailDrawingPoints([])}
-                          className="px-2 py-1 bg-gray-800 text-gray-300 rounded text-[8.5px] font-bold uppercase"
+                          type="button"
+                          onClick={relocateAccessPin}
+                          className="px-2 py-1 bg-gray-800 text-gray-300 rounded text-[8px] font-bold uppercase"
                         >
-                          Limpiar
+                          Reubicar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={finishAccessMapWork}
+                          className="px-2.5 py-1 bg-blue-600 text-white rounded text-[8px] font-bold uppercase"
+                        >
+                          Continuar
                         </button>
                       </div>
                     )}
@@ -2304,8 +2549,9 @@ export default function App() {
                       />
                     )}
 
-                    {/* Draw polygon points */}
-                    {drawMode === 'beach' && drawingPoints.length > 0 && (
+                    {/* Draw polygon points — visible while drawing or completing the ficha */}
+                    {(drawMode === 'beach' || (isNewBeachOpen && beachFormStep === 'details')) &&
+                      drawingPoints.length > 0 && (
                       <>
                         {drawingPoints.map((pt, idx) => {
                           if (typeof pt[0] !== 'number' || isNaN(pt[0]) || typeof pt[1] !== 'number' || isNaN(pt[1])) return null;
@@ -2334,8 +2580,9 @@ export default function App() {
                       </>
                     )}
 
-                    {/* Draw trail path */}
-                    {drawMode === 'trail' && trailDrawingPoints.length > 0 && (
+                    {/* Draw trail path — visible while drawing or completing access ficha */}
+                    {(drawMode === 'trail' ||
+                      (isNewAccessOpen && accessFormStep === 'details' && trailDrawingPoints.length > 0)) && (
                       <>
                         {trailDrawingPoints.map((pt, idx) => {
                           if (typeof pt[0] !== 'number' || isNaN(pt[0]) || typeof pt[1] !== 'number' || isNaN(pt[1])) return null;
@@ -2394,16 +2641,31 @@ export default function App() {
               <div className="flex-1 text-left">
                 <span className="font-bold text-emerald-400 block">Modo interactivo activo</span>
                 <p className="text-[10px] text-gray-400 mt-0.5">
-                  {drawMode === 'beach' && 'Haz clic en el mapa para delimitar la playa. Presiona "Listo" cuando termines.'}
-                  {drawMode === 'access_pin' && 'Haz clic en el punto de entrada o portón del acceso.'}
-                  {drawMode === 'trail' && 'Haz clic para ir trazando el sendero peatonal en el mapa.'}
+                  {drawMode === 'beach' &&
+                    'Haz clic en el mapa para delimitar la playa. Use Deshacer, Limpiar o Continuar cuando termine.'}
+                  {drawMode === 'access_pin' &&
+                    'Haz clic en el punto de entrada o portón del acceso.'}
+                  {drawMode === 'trail' &&
+                    'Haz clic para trazar el sendero. Use Deshacer, Limpiar o Continuar cuando termine.'}
+                  {!drawMode &&
+                    accessFormStep === 'map' &&
+                    isFormMinimized &&
+                    placedPinCoordinates &&
+                    'Entrada fijada. Trazar sendero, reubicar o continuar al formulario.'}
                 </p>
               </div>
               <button
                 onClick={() => {
                   setIsFormMinimized(false);
-                  if (drawMode === 'beach') setIsNewBeachOpen(true);
-                  else setIsNewAccessOpen(true);
+                  if (drawMode === 'beach') {
+                    setBeachFormStep(drawingPoints.length >= 3 ? 'details' : 'draw');
+                    setIsNewBeachOpen(true);
+                  } else if (drawMode === 'access_pin' || drawMode === 'trail' || accessFormStep === 'map') {
+                    setAccessFormStep(placedPinCoordinates ? 'details' : 'map');
+                    setIsNewAccessOpen(true);
+                  } else {
+                    setIsNewAccessOpen(true);
+                  }
                   setDrawMode(null);
                 }}
                 className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-xl font-bold uppercase text-[9.5px] transition-all text-white shadow"
@@ -2556,22 +2818,21 @@ export default function App() {
       {/* Add new Beach modal */}
       <NewBeachModal
         isOpen={isNewBeachOpen}
-        onClose={() => setIsNewBeachOpen(false)}
+        onClose={closeNewBeachFlow}
+        step={beachFormStep}
         newBeachName={newBeachName}
         setNewBeachName={setNewBeachName}
         newBeachState={newBeachState}
-        setNewBeachState={setNewBeachState}
+        setNewBeachState={(state) => {
+          setNewBeachState(state);
+          setStateAutoDetected(false);
+        }}
+        stateAutoDetected={stateAutoDetected}
         newBeachImages={newBeachImages}
         setNewBeachImages={setNewBeachImages}
         drawingPoints={drawingPoints}
-        onMinimizeDraw={() => {
-          setIsNewBeachOpen(false);
-          setIsFormMinimized(true);
-          setDrawMode('beach');
-          setDrawingPoints([]);
-          const el = document.getElementById('explorer-section');
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
-        }}
+        onStartDrawing={startBeachDrawing}
+        onBackToDrawing={backToBeachDrawing}
         handleBeachImagesUpload={handleBeachImagesUpload}
         onSubmit={submitNewBeach}
       />
@@ -2579,7 +2840,8 @@ export default function App() {
       {/* Add new Access modal */}
       <NewAccessModal
         isOpen={isNewAccessOpen}
-        onClose={() => setIsNewAccessOpen(false)}
+        onClose={closeNewAccessFlow}
+        step={accessFormStep}
         beaches={beaches}
         newAccessName={newAccessName}
         setNewAccessName={setNewAccessName}
@@ -2603,16 +2865,8 @@ export default function App() {
         setNewAccessAmenities={setNewAccessAmenities}
         newAccessAccessibility={newAccessAccessibility}
         setNewAccessAccessibility={setNewAccessAccessibility}
-        onMinimizeDraw={(mode) => {
-          setIsNewAccessOpen(false);
-          setIsFormMinimized(true);
-          setDrawMode(mode);
-          if (mode === 'trail') {
-            setTrailDrawingPoints([]);
-          }
-          const el = document.getElementById('explorer-section');
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
-        }}
+        onStartMapWork={startAccessMapWork}
+        onBackToMap={backToAccessMap}
         handleAccessImagesUpload={handleAccessImagesUpload}
         onSubmit={submitNewAccess}
         nearestBeach={nearestBeach}
@@ -2635,6 +2889,23 @@ export default function App() {
         setSelectedAccessId={setSelectedAccessId}
         setMapCenter={setMapCenter}
         viewUserProfile={viewUserProfile}
+      />
+
+      <GuideFirstVisitBanner
+        visible={!bannerDismissed && !tourCompleted}
+        onDismiss={dismissBanner}
+        onScrollToGuide={scrollToGuideSection}
+      />
+
+      <OnboardingTour
+        isOpen={isTourOpen}
+        onClose={() => setIsTourOpen(false)}
+        onComplete={completeTour}
+        onSkip={() => {
+          skipTour();
+          setIsTourOpen(false);
+        }}
+        isMobile={isMobile}
       />
 
       {/* Toast notifications */}
